@@ -1,0 +1,864 @@
+.panel {
+  width: 55%;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  overflow-y: auto;
+  gap: clamp(10px, 1.4vh, 16px);
+  padding: clamp(16px, 2.6vh, 28px) clamp(24px, 4vw, 56px);
+}
+
+.mediaStage {
+  width: min(680px, 100%);
+  max-height: min(62vh, 640px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(18px, 2vw, 28px);
+  position: relative;
+  z-index: 1;
+}
+
+.sideBySide {
+  width: min(840px, 100%);
+}
+
+.voiceStage,
+.textStage {
+  width: min(560px, 100%);
+  max-height: none;
+}
+
+.hiddenMedia {
+  position: fixed;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-9999px);
+}
+
+/* 비디오 래퍼 */
+.videoWrap {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  max-height: min(58vh, 620px);
+  aspect-ratio: 9/16;
+  border-radius: 24px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-media), 0 0 0 1px rgba(184,138,94,0.1);
+  background: var(--media-bg);
+}
+
+.sideBySide .videoWrap,
+.sideBySide .cameraPreview {
+  width: min(300px, calc(50% - 14px));
+  max-width: 300px;
+  max-height: min(54vh, 500px);
+  aspect-ratio: 3/4;
+}
+
+.video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: opacity 0.5s ease;
+}
+
+/* 플레이스홀더 */
+.placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: linear-gradient(160deg, var(--card-bg-from) 0%, var(--card-bg-to) 100%);
+}
+
+.modePlaceholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: linear-gradient(160deg, var(--card-bg-from) 0%, var(--card-bg-to) 100%);
+}
+
+.avatarIcon {
+  width: 96px;
+  height: 96px;
+  border-radius: 18px;
+  background: rgba(184, 138, 94, 0.22);
+  border: 1px solid rgba(139, 90, 43, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--gold);
+  margin-bottom: 8px;
+  box-shadow: 0 2px 8px rgba(58, 40, 23, 0.10);
+}
+
+.voicePanel,
+.textPanel {
+  width: min(420px, 100%);
+  min-height: 260px;
+  border-radius: 28px;
+  border: 1px solid var(--border);
+  background: linear-gradient(160deg, var(--card-bg-from), var(--card-bg-to));
+  box-shadow: var(--shadow-card), inset 0 0 0 1px var(--overlay-soft);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 34px 26px;
+  text-align: center;
+}
+
+.voicePanel {
+  min-height: 300px;
+}
+
+.circularVisualizer {
+  width: 240px;
+  height: 240px;
+  position: relative;
+  display: grid;
+  place-items: center;
+  margin-bottom: 8px;
+  filter: var(--vis-glow);
+}
+
+/* === 라이트 모드 — 동심원 펄스 (concentric ripples) === */
+.circularVisualizer::before,
+.circularVisualizer::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  border: 2px solid var(--gold);
+  transform: translate(-50%, -50%);
+  animation: ripplePulse 2.6s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.circularVisualizer::after {
+  animation-delay: 1.3s;
+}
+
+.voiceSpeaking.circularVisualizer::before,
+.voiceSpeaking.circularVisualizer::after {
+  animation-duration: 1.6s;
+}
+
+.voiceSpeaking.circularVisualizer::after {
+  animation-delay: 0.8s;
+}
+
+@keyframes ripplePulse {
+  0%   { width: 36px;  height: 36px;  opacity: 0;    border-width: 2px; }
+  18%  { opacity: 0.75; }
+  100% { width: 220px; height: 220px; opacity: 0;    border-width: 1px; }
+}
+
+/* 라이트 모드: 막대 숨김 */
+.visualizerBar {
+  display: none;
+  position: absolute;
+  inset: 0;
+  transform: rotate(var(--angle));
+}
+
+/* === 다크 모드 — 기존 막대형 복원 === */
+:global([data-theme="dark"]) .visualizerBar {
+  display: block;
+}
+
+:global([data-theme="dark"]) .circularVisualizer::before,
+:global([data-theme="dark"]) .circularVisualizer::after {
+  content: none;
+}
+
+.visualizerBar::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 17px;
+  width: 3px;
+  height: var(--bar-height);
+  border-radius: 999px;
+  transform: translateX(-50%);
+  transform-origin: 50% 100%;
+  background: var(--bar-grad-1);
+  box-shadow: var(--bar-shadow);
+  opacity: 0.82;
+  animation: circularBar 0.96s ease-in-out infinite;
+  animation-delay: var(--delay);
+}
+
+.visualizerBar:nth-child(4n)::before {
+  background: var(--bar-grad-2);
+}
+
+.visualizerBar:nth-child(4n + 1)::before {
+  background: var(--bar-grad-3);
+}
+
+.visualizerBar:nth-child(4n + 2)::before {
+  background: var(--bar-grad-4);
+}
+
+.visualizerBar:nth-child(4n + 3)::before {
+  background: var(--bar-grad-5);
+}
+
+.voiceSpeaking .visualizerBar::before {
+  animation-duration: 0.52s;
+  opacity: 1;
+}
+
+.textPanel {
+  min-height: 240px;
+}
+
+.textBadge {
+  width: 92px;
+  height: 92px;
+  border-radius: 24px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(201,162,126,0.34);
+  background: rgba(201,162,126,0.1);
+  color: var(--gold);
+  font-size: 24px;
+  font-weight: 800;
+}
+
+@keyframes circularBar {
+  0%, 100% {
+    height: calc(var(--bar-height) * 0.38);
+    opacity: 0.4;
+  }
+  38% {
+    height: calc(var(--bar-height) * 1.55);
+    opacity: 1;
+  }
+  64% {
+    height: calc(var(--bar-height) * 0.7);
+    opacity: 0.68;
+  }
+}
+
+.modeIcon {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  border: 1px solid rgba(201,162,126,0.28);
+  background: rgba(201,162,126,0.1);
+  color: var(--gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: 0;
+  margin-bottom: 8px;
+}
+
+.placeholderText {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--stage-text);
+  letter-spacing: -0.3px;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.placeholderSub {
+  font-size: 12px;
+  color: var(--stage-muted);
+  font-weight: 300;
+}
+
+/* 네임플레이트 (뉴스 자막 스타일) */
+.nameplate {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 16px 20px;
+  background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 100%);
+}
+
+.nameplateInner {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.nameplateInner::before {
+  content: '';
+  display: block;
+  width: 32px;
+  height: 2px;
+  background: var(--gold);
+  margin-bottom: 8px;
+  border-radius: 1px;
+}
+
+.nameplateName {
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.3px;
+}
+
+.nameplateSub {
+  font-size: 11px;
+  color: rgba(255,255,255,0.55);
+  font-weight: 300;
+}
+
+/* 발화 글로우 */
+.speakGlow {
+  position: absolute;
+  inset: -2px;
+  border-radius: 24px;
+  border: 2px solid rgba(59,130,246,0.6);
+  box-shadow: 0 0 24px rgba(59,130,246,0.4), inset 0 0 24px rgba(59,130,246,0.05);
+  pointer-events: none;
+  animation: pulseGlow 1.5s ease-in-out infinite;
+}
+
+.cameraPreview {
+  position: relative;
+  width: 100%;
+  max-width: 300px;
+  aspect-ratio: 3/4;
+  border-radius: 24px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: linear-gradient(160deg, var(--card-bg-from), var(--card-bg-to));
+  color: var(--stage-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  box-shadow: var(--shadow-media);
+  z-index: 1;
+}
+
+.cameraOn {
+  border-color: rgba(74,222,128,0.7);
+  box-shadow: 0 0 0 1px rgba(74,222,128,0.16), var(--shadow-media);
+}
+
+.cameraVideo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scaleX(-1);
+}
+
+.cameraPlaceholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.cameraPlaceholder span {
+  font-size: 18px;
+  color: var(--text);
+  opacity: 0.72;
+}
+
+.cameraPlaceholder small {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.optionPanel {
+  width: min(240px, 100%);
+  padding: 6px;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: var(--overlay-soft);
+  position: relative;
+  z-index: 2;
+}
+
+.optionRow {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.optionToggle {
+  min-width: 0;
+  min-height: 42px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: transparent;
+  color: var(--muted);
+  font-family: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 10px;
+  transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+}
+
+.optionToggle:hover:not(:disabled) {
+  background: var(--overlay-soft);
+  color: var(--text);
+}
+
+.optionToggle:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.optionToggleOn {
+  background: rgba(184,138,94,0.18);
+  border-color: rgba(184,138,94,0.55);
+  color: var(--text);
+}
+
+.toggleIcon {
+  font-size: 17px;
+  line-height: 1;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.toggleTrack {
+  width: 34px;
+  height: 20px;
+  border-radius: 999px;
+  background: var(--overlay-track);
+  border: 1px solid var(--border);
+  padding: 2px;
+  flex-shrink: 0;
+  transition: background 0.18s ease, border-color 0.18s ease;
+}
+
+.toggleTrack span {
+  display: block;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--muted);
+  transition: transform 0.18s ease, background 0.18s ease;
+}
+
+.optionToggleOn .toggleTrack {
+  background: rgba(184,138,94,0.45);
+  border-color: rgba(139,90,43,0.55);
+}
+
+.optionToggleOn .toggleTrack span {
+  transform: translateX(14px);
+  background: var(--gold);
+  box-shadow: 0 1px 3px rgba(58,40,23,0.25);
+}
+
+@keyframes pulseGlow {
+  0%, 100% { opacity: 0.7; }
+  50%       { opacity: 1; }
+}
+
+/* 상태 배지 */
+.statusRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.interruptBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 32px;
+  padding: 7px 14px;
+  background: rgba(37, 99, 235, 0.14);
+  color: #bfdbfe;
+  border: 1px solid rgba(96, 165, 250, 0.45);
+  border-radius: 999px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.interruptBtn:hover {
+  background: rgba(37, 99, 235, 0.24);
+  border-color: rgba(147, 197, 253, 0.75);
+  transform: translateY(-1px);
+}
+
+.pauseIcon {
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+  color: #93c5fd;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.dot.gray   { background: #4b5563; }
+.dot.yellow { background: #eab308; animation: blink 1s infinite; }
+.dot.green  { background: var(--green); box-shadow: 0 0 8px var(--green); }
+.dot.blue   { background: var(--blue); box-shadow: 0 0 8px var(--blue); animation: blink 0.8s infinite; }
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.3; }
+}
+
+.statusLabel {
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 400;
+}
+
+/* 시작 버튼 */
+.startBtn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 32px;
+  background: var(--gold);
+  color: #fff;
+  border: 1px solid var(--gold-dim);
+  border-radius: 50px;
+  font-size: 15px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  letter-spacing: -0.2px;
+  box-shadow: 0 4px 24px rgba(184, 138, 94, 0.30);
+}
+
+.startBtn:hover:not(:disabled) {
+  background: #d4af8e;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 32px rgba(201,162,126,0.4);
+}
+
+.startBtn:disabled {
+  background: var(--overlay-track);
+  color: var(--muted);
+  cursor: default;
+  box-shadow: none;
+}
+
+.startBtnIcon {
+  font-size: 12px;
+}
+
+/* 종료 버튼 — 빨강 톤 */
+.stopBtn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 28px;
+  background: rgba(220, 38, 38, 0.12);
+  color: #fca5a5;
+  border: 1px solid rgba(220, 38, 38, 0.4);
+  border-radius: 50px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  letter-spacing: -0.2px;
+}
+.stopBtn:hover {
+  background: rgba(220, 38, 38, 0.22);
+  color: #fff;
+  border-color: rgba(220, 38, 38, 0.7);
+}
+@media (max-width: 768px) {
+  .stopBtn {
+    padding: 9px 18px;
+    font-size: 12px;
+  }
+}
+
+/* 스피너 */
+.spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--overlay-track);
+  border-top-color: var(--muted);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+/* 큰 스피너 — 아바타 로딩 placeholder 안에서 사용 */
+.loadingSpinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid var(--overlay-track);
+  border-top-color: var(--accent, #d4a574);
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+  margin-bottom: 18px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ════════════════════════════════════════════════
+   📱 모바일 (≤768px)
+   - 가로 100% / 세로 40% 차지
+   - 비디오 작게 (가로 가득까진 X, 화면 절반쯤)
+   - 오브·placeholder 텍스트 줄임
+   ════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .panel {
+    width: 100%;
+    height: 47%;
+    min-height: 372px;
+    padding: 16px 16px 12px;
+    gap: 5px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .mediaStage,
+  .sideBySide {
+    width: min(300px, 100%);
+    gap: 8px;
+  }
+
+  .voiceStage,
+  .textStage {
+    width: min(260px, 100%);
+  }
+
+  .voicePanel,
+  .textPanel {
+    width: 100%;
+    min-height: 132px;
+    border-radius: 18px;
+    gap: 5px;
+    padding: 10px 12px;
+  }
+
+  .circularVisualizer {
+    width: 104px;
+    height: 104px;
+    margin-bottom: 0;
+  }
+
+  .visualizerBar {
+    inset: 0;
+  }
+
+  .visualizerBar::before {
+    top: 9px;
+    width: 2px;
+  }
+
+  .textBadge {
+    width: 54px;
+    height: 54px;
+    border-radius: 15px;
+    font-size: 16px;
+  }
+
+  .videoWrap {
+    max-width: 126px;
+    max-height: none;
+    aspect-ratio: 3/4;
+    border-radius: 18px;
+  }
+
+  .avatarIcon {
+    width: 64px;
+    height: 64px;
+    font-size: 30px;
+    margin-bottom: 4px;
+  }
+
+  .modeIcon {
+    width: 64px;
+    height: 64px;
+    font-size: 18px;
+    margin-bottom: 4px;
+  }
+
+  .cameraPreview {
+    max-width: 126px;
+    border-radius: 18px;
+    font-size: 9px;
+  }
+
+  .sideBySide .videoWrap,
+  .sideBySide .cameraPreview {
+    width: min(126px, calc(50% - 4px));
+  }
+
+  .placeholderText {
+    font-size: 12px;
+    line-height: 1.25;
+    max-width: 96%;
+  }
+
+  .placeholderSub {
+    font-size: 9px;
+    line-height: 1.35;
+    max-width: 96%;
+  }
+
+  .nameplate {
+    padding: 8px 10px;
+  }
+
+  .nameplateName {
+    font-size: 11px;
+    line-height: 1.25;
+  }
+
+  .nameplateSub {
+    font-size: 9px;
+    line-height: 1.3;
+  }
+
+  .nameplateInner::before {
+    width: 24px;
+    margin-bottom: 6px;
+  }
+
+  .startBtn {
+    padding: 8px 18px;
+    font-size: 12px;
+  }
+
+  .optionPanel {
+    width: min(180px, 100%);
+    padding: 5px;
+    border-radius: 12px;
+  }
+
+  .optionRow {
+    gap: 4px;
+  }
+
+  .optionToggle {
+    min-height: 32px;
+    border-radius: 9px;
+    padding: 6px 7px;
+    gap: 6px;
+  }
+
+  .toggleIcon {
+    font-size: 15px;
+  }
+
+  .toggleTrack {
+    width: 28px;
+    height: 17px;
+    padding: 2px;
+  }
+
+  .toggleTrack span {
+    width: 11px;
+    height: 11px;
+  }
+
+  .optionToggleOn .toggleTrack span {
+    transform: translateX(11px);
+  }
+
+  .statusLabel {
+    font-size: 11px;
+  }
+
+  .stopBtn {
+    padding: 7px 16px;
+    min-height: 34px;
+    font-size: 12px;
+    border-radius: 18px;
+  }
+}
+
+.statusRow,
+.interruptBtn,
+.startBtn,
+.stopBtn {
+  flex-shrink: 0;
+}
+
+@media (min-width: 769px) and (max-width: 1280px) {
+  .mediaStage {
+    width: min(620px, 100%);
+    max-height: min(58vh, 520px);
+  }
+
+  .sideBySide {
+    width: min(640px, 100%);
+  }
+
+  .sideBySide .videoWrap,
+  .sideBySide .cameraPreview {
+    width: min(240px, calc(50% - 10px));
+    max-width: 240px;
+  }
+
+  .optionPanel {
+    width: min(240px, 100%);
+  }
+}
+
+/* 매우 작은 화면 (≤380px) */
+@media (max-width: 380px) {
+  .panel {
+    height: 48%;
+    min-height: 360px;
+  }
+  .videoWrap {
+    max-width: 110px;
+  }
+
+  .cameraPreview {
+    max-width: 110px;
+  }
+}

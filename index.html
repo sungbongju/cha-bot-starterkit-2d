@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+    <!-- 카카오톡 인앱 브라우저 → 외부 브라우저 강제 전환 (마이크/WebRTC 권한 위함) -->
+    <script>
+    (function(){
+      var ua = navigator.userAgent || '';
+      if (/KAKAOTALK/i.test(ua)) {
+        var currentUrl = location.href;
+        if (/Android/i.test(ua)) {
+          location.href = 'intent://' + currentUrl.replace(/https?:\/\//, '') +
+            '#Intent;scheme=https;package=com.android.chrome;end';
+          return;
+        }
+        if (/iPhone|iPad|iPod/i.test(ua)) {
+          location.href = 'kakaotalk://web/openExternal?url=' + encodeURIComponent(currentUrl);
+          return;
+        }
+      }
+    })();
+    </script>
+
+    <title>VRM AI Bot Starterkit (Team Edition)</title>
+    <meta name="description" content="Team-RAG variant of cha-bot-starter-kit — server-side per-team RAG + Kakao login." />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="VRM AI Bot Starterkit (Team Edition)" />
+    <meta property="og:description" content="VRM avatar + streaming chat + voice + team-isolated RAG." />
+    <meta property="og:locale" content="ko_KR" />
+
+    <!-- favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50' y='65' font-size='60' text-anchor='middle'%3E%F0%9F%A4%96%3C/text%3E%3C/svg%3E" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+    <!-- 카카오 JavaScript SDK + init (학생은 .env 의 VITE_KAKAO_JS_KEY 설정만 하면 됨) -->
+    <script src="https://developers.kakao.com/sdk/js/kakao.min.js"></script>
+    <script>
+      window.addEventListener('DOMContentLoaded', function () {
+        var KAKAO_JS_KEY = '%VITE_KAKAO_JS_KEY%';
+        if (!KAKAO_JS_KEY || KAKAO_JS_KEY === '%' + 'VITE_KAKAO_JS_KEY%') {
+          console.warn('[Kakao] VITE_KAKAO_JS_KEY not set — Kakao login disabled. Add it in Vercel env or local .env');
+          return;
+        }
+        try {
+          if (window.Kakao && !window.Kakao.isInitialized()) {
+            window.Kakao.init(KAKAO_JS_KEY);
+          }
+        } catch (e) { console.error('Kakao init error:', e); }
+      });
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

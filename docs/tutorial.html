@@ -1,0 +1,1200 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>나만의 봇 만들기 자습서 — cha-bot-starterkit (Team Edition)</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif;
+    background: #faf8f5;
+    color: #1a1a1a;
+    line-height: 1.75;
+  }
+  .hero {
+    background: linear-gradient(135deg, #1a365d 0%, #2d5a87 100%);
+    color: white;
+    padding: 50px 20px;
+    text-align: center;
+  }
+  .hero h1 { font-size: 2rem; margin-bottom: 10px; }
+  .hero p { opacity: 0.9; }
+  .hero a { color: #d4a574; text-decoration: none; }
+  .badge {
+    display: inline-block; padding: 3px 10px; background: rgba(212,165,116,0.25);
+    border: 1px solid #d4a574; border-radius: 12px; font-size: 0.8rem; margin-top: 8px;
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    max-width: 1300px;
+    margin: 0 auto;
+    gap: 30px;
+    padding: 30px 20px;
+  }
+
+  /* Sidebar */
+  .sidebar {
+    position: sticky;
+    top: 20px;
+    height: calc(100vh - 40px);
+    overflow-y: auto;
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+  }
+  .sidebar h3 { color: #1a365d; font-size: 0.95rem; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 2px solid #f0e8d8; }
+  .sidebar ol { list-style: none; counter-reset: step; }
+  .sidebar li { counter-increment: step; margin-bottom: 4px; }
+  .sidebar li a {
+    display: block;
+    color: #2d5a87;
+    text-decoration: none;
+    padding: 8px 10px;
+    border-radius: 6px;
+    font-size: 0.88rem;
+    transition: background 0.2s;
+  }
+  .sidebar li a:hover { background: #e8f0f8; }
+  .sidebar li a::before {
+    content: counter(step) ". ";
+    color: #d4a574;
+    font-weight: 700;
+  }
+
+  /* Main content */
+  .content {
+    background: white;
+    border-radius: 12px;
+    padding: 40px 50px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    min-width: 0;
+  }
+  .content section { margin-bottom: 60px; scroll-margin-top: 20px; }
+  .content h2 {
+    color: #1a365d;
+    font-size: 1.6rem;
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 3px solid #d4a574;
+  }
+  .content h3 {
+    color: #2d5a87;
+    font-size: 1.2rem;
+    margin-top: 28px;
+    margin-bottom: 12px;
+  }
+  .content p { margin-bottom: 12px; }
+  .content ul, .content ol { padding-left: 24px; margin-bottom: 16px; }
+  .content li { margin-bottom: 6px; }
+
+  /* Code block */
+  pre {
+    background: #1e293b;
+    color: #f1f5f9;
+    padding: 16px 20px;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin: 12px 0;
+    font-family: 'Cascadia Code', 'Consolas', 'Monaco', monospace;
+    font-size: 0.88rem;
+    line-height: 1.6;
+    position: relative; /* copy-btn 절대 위치 기준 */
+  }
+
+  /* OS 탭 (Windows / Mac 토글) */
+  .os-tabs {
+    margin: 12px 0;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .os-tabs .tab-nav {
+    display: flex;
+    background: #f8fafc;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  .os-tabs .tab-btn {
+    flex: 1;
+    padding: 10px 16px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    color: #6b7280;
+    border-bottom: 3px solid transparent;
+    transition: all 0.15s;
+    font-family: -apple-system, system-ui, sans-serif;
+  }
+  .os-tabs .tab-btn:hover {
+    background: #f1f5f9;
+    color: #1e293b;
+  }
+  .os-tabs .tab-btn.active {
+    color: #2563eb;
+    border-bottom-color: #2563eb;
+    background: white;
+  }
+  .os-tabs .tab-panel {
+    display: none;
+    padding: 12px 16px;
+  }
+  .os-tabs .tab-panel.active {
+    display: block;
+  }
+  .os-tabs pre {
+    margin: 0;
+  }
+  code {
+    background: #f5f0e6;
+    color: #1a365d;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'Cascadia Code', 'Consolas', 'Monaco', monospace;
+    font-size: 0.88em;
+  }
+  pre code { background: none; color: inherit; padding: 0; font-size: inherit; }
+
+  /* Copy button (Claude / GPT 스타일) */
+  .copy-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    padding: 5px 10px;
+    background: rgba(255, 255, 255, 0.08);
+    color: #cbd5e1;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 6px;
+    font-size: 11px;
+    font-family: -apple-system, system-ui, sans-serif;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s, background 0.2s, transform 0.1s;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    user-select: none;
+  }
+  pre:hover .copy-btn,
+  .copy-btn:focus {
+    opacity: 1;
+  }
+  .copy-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: #f8fafc;
+  }
+  .copy-btn:active {
+    transform: scale(0.96);
+  }
+  .copy-btn.copied {
+    background: rgba(16, 185, 129, 0.2);
+    color: #6ee7b7;
+    border-color: rgba(16, 185, 129, 0.4);
+    opacity: 1;
+  }
+  /* 모바일에서는 항상 보이게 */
+  @media (max-width: 768px) {
+    .copy-btn { opacity: 0.7; }
+  }
+
+  /* Callout boxes */
+  .tip {
+    background: #e8f4f8;
+    border-left: 4px solid #2196f3;
+    padding: 14px 18px;
+    border-radius: 6px;
+    margin: 16px 0;
+  }
+  .warn {
+    background: #fff3cd;
+    border-left: 4px solid #ffc107;
+    padding: 14px 18px;
+    border-radius: 6px;
+    margin: 16px 0;
+  }
+  .danger {
+    background: #f8d7da;
+    border-left: 4px solid #dc3545;
+    padding: 14px 18px;
+    border-radius: 6px;
+    margin: 16px 0;
+  }
+  .info {
+    background: #f0e8d8;
+    border-left: 4px solid #d4a574;
+    padding: 14px 18px;
+    border-radius: 6px;
+    margin: 16px 0;
+  }
+  .tip strong, .warn strong, .danger strong, .info strong { display: block; margin-bottom: 4px; }
+
+  /* Step indicator */
+  .step-num {
+    display: inline-block;
+    background: #d4a574;
+    color: white;
+    width: 32px;
+    height: 32px;
+    line-height: 32px;
+    text-align: center;
+    border-radius: 50%;
+    font-weight: 700;
+    margin-right: 10px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+  }
+  th, td {
+    padding: 10px 14px;
+    border: 1px solid #e0e0e0;
+    text-align: left;
+  }
+  th { background: #f5f0e6; color: #1a365d; }
+
+  /* Mobile */
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { position: static; height: auto; }
+    .content { padding: 24px 20px; }
+  }
+
+  footer {
+    background: #1a365d;
+    color: #ccc;
+    text-align: center;
+    padding: 30px 20px;
+    font-size: 0.9rem;
+  }
+  footer a { color: #d4a574; text-decoration: none; }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>🛠️ 나만의 봇 만들기 자습서</h1>
+  <p><strong>cha-bot-starterkit</strong> (Team Edition) — 16팀 비즈모델 경진대회용</p>
+  <p class="badge">Gemma4 + 서버 사이드 RAG (학생 비용 0원)</p>
+  <p style="margin-top:10px; font-size:0.9rem;">
+    <a href="https://github.com/sungbongju/cha-bot-starterkit">GitHub 레포</a>
+  </p>
+</div>
+
+<div class="layout">
+
+  <aside class="sidebar">
+    <h3>📚 단계별 목차</h3>
+    <ol>
+      <li><a href="#step-1">사전 준비 (Git 설치)</a></li>
+      <li><a href="#step-2">GitHub 계정 + Git config</a></li>
+      <li><a href="#step-3">템플릿 클론</a></li>
+      <li><a href="#step-4">환경 변수 (.env, 선택)</a></li>
+      <li><a href="#step-5">본인 레포 만들기 + 푸시</a></li>
+      <li><a href="#step-6">Vercel 배포</a></li>
+      <li><a href="#step-7">카카오 SDK (로그인 + 공유)</a></li>
+      <li><a href="#step-8">VRoid 아바타 적용 🎨</a></li>
+      <li><a href="#step-9">RAG 페이지: 페르소나 + 지식 ⭐</a></li>
+      <li><a href="#step-10">완성! 봇 공유하기 🎉</a></li>
+    </ol>
+  </aside>
+
+  <main class="content">
+
+    <section>
+      <h2>📖 이 자습서가 제공하는 것</h2>
+      <p>
+        16팀 비즈모델 경진대회용 봇을 학생이 <strong>코드 수정 없이</strong> 만들 수 있도록 안내합니다.
+      </p>
+      <table>
+        <tr><th>항목</th><th>이 자습서 제공</th></tr>
+        <tr><td>LLM</td><td><strong>Gemma4</strong> (미들턴 공유, 학생 비용 0원)</td></tr>
+        <tr><td>RAG 수정</td><td><strong>웹 페이지</strong>에서 텍스트 붙여넣기 → AI 자동 청크화</td></tr>
+        <tr><td>16팀 격리</td><td><strong>팀별 분리 파일</strong> (다른 팀 영향 없음)</td></tr>
+        <tr><td>학생 작업</td><td>Vercel 환경변수 2개 설정 + RAG 페이지에서 텍스트 추가만</td></tr>
+      </table>
+      <div class="info">
+        <strong>💡 5단계 핵심 흐름</strong>
+        Step 2 GitHub 푸시 → Step 6 Vercel 배포 (TEAM_ID + 카카오 키) → Step 7 카카오 SDK → Step 8 VRoid 아바타 → Step 9 페르소나 + RAG 청크
+      </div>
+    </section>
+
+    <!-- STEP 1 -->
+    <section id="step-1">
+      <h2><span class="step-num">1</span>사전 준비 — Git 설치</h2>
+
+      <div class="info" style="background:#fef3c7;border-color:#f59e0b">
+        <strong>🍎 Mac 사용자 안내</strong>
+        <p style="margin:6px 0">
+          이 자습서의 명령어는 <strong>Windows CMD</strong> 기준입니다. Mac 학생은 <strong>"터미널 (Terminal)"</strong> 앱을
+          열고 다음만 치환하면 됩니다 (나머지는 동일):
+        </p>
+        <table style="margin-top:8px">
+          <tr><th>Windows CMD</th><th>Mac Terminal</th></tr>
+          <tr><td><code>rmdir /s /q [폴더]</code></td><td><code>rm -rf [폴더]</code></td></tr>
+          <tr><td><code>dir</code></td><td><code>ls</code></td></tr>
+          <tr><td><code>cd C:\projects</code></td><td><code>cd ~/projects</code></td></tr>
+          <tr><td><code>%USERPROFILE%\Desktop</code></td><td><code>~/Desktop</code></td></tr>
+          <tr><td><code>copy [원본] [대상]</code></td><td><code>cp [원본] [대상]</code></td></tr>
+          <tr><td><code>type [파일] | findstr [검색어]</code></td><td><code>grep [검색어] [파일]</code></td></tr>
+        </table>
+        <p style="margin:8px 0 0;font-size:0.9em">
+          <strong>git, vercel, gh 명령어는 Windows/Mac 동일.</strong>
+          Mac에 Git은 보통 기본 설치돼 있음 (없으면 Xcode Command Line Tools 자동 안내).
+        </p>
+      </div>
+
+      <div class="info">
+        <strong>💡 진짜 필요한 건 Git 하나뿐</strong>
+        <p style="margin:6px 0 0">
+          코드 빌드/실행은 전부 <strong>Vercel이 클라우드에서 자동 처리</strong>합니다.
+          학생 PC에는 <strong>Git만 깔면 끝</strong>입니다.
+        </p>
+      </div>
+
+      <table style="margin-top:12px">
+        <tr><th>도구</th><th>필요도</th><th>이유</th></tr>
+        <tr><td><strong>Git</strong></td><td>✅ 필수</td><td>git clone, git push 에 사용</td></tr>
+        <tr><td><strong>VS Code</strong></td><td>⚪ 선택</td><td>코드 보고 싶을 때. 메모장도 OK</td></tr>
+      </table>
+
+      <h3>1-0. CMD (명령 프롬프트) 열기</h3>
+      <p>윈도우에서 CMD 여는 방법 (셋 중 아무거나):</p>
+      <ul>
+        <li><strong>Win + R</strong> 키 동시 누름 → <code>cmd</code> 입력 → Enter</li>
+        <li>시작 메뉴 → <code>cmd</code> 또는 <code>명령 프롬프트</code> 검색 → 클릭</li>
+        <li>탐색기 주소창에 <code>cmd</code> 입력 → Enter (현재 폴더에서 열림)</li>
+      </ul>
+      <p>검은색 창 (또는 흰색) 이 뜨면 OK. 여기에 명령어를 입력합니다.</p>
+
+      <h3>1-1. Git 확인</h3>
+      <pre><code>git --version</code></pre>
+
+      <div class="info">
+        <strong>✅ 설치되어 있으면</strong>
+        <pre style="margin:8px 0 0"><code>git version 2.49.0</code></pre>
+        → 통과. 1-3 으로.
+      </div>
+
+      <div class="danger">
+        <strong>❌ 설치 안 되어 있으면</strong>
+        <pre style="margin:8px 0 0"><code>'git'은(는) 내부 또는 외부 명령... 명령으로 인식되지 않습니다.</code></pre>
+      </div>
+
+      <h4>📥 Git 설치</h4>
+
+      <div class="os-tabs">
+        <div class="tab-nav">
+          <button class="tab-btn" data-os="win">🪟 Windows</button>
+          <button class="tab-btn" data-os="mac">🍎 Mac</button>
+        </div>
+        <div class="tab-panel" data-os="win">
+          <p><strong>한 줄 설치 (권장)</strong>:</p>
+          <pre><code>winget install --id Git.Git -e --source winget</code></pre>
+          <p style="font-size:13px;color:#6b7280">설치 후 <strong>CMD 새 창 열기</strong> 필수.</p>
+          <p style="margin-top:12px">또는 GUI: <a href="https://git-scm.com/download/win" target="_blank">git-scm.com/download/win</a> → 다운로드 → 마법사 Next 다 누름.</p>
+          <p style="font-size:13px;color:#6b7280;margin-top:8px">보너스: Git 설치 시 <strong>Git Bash</strong>도 같이 설치됨 (시작 메뉴에서 "Git Bash" 검색). macOS/Linux 와 같은 환경.</p>
+        </div>
+        <div class="tab-panel" data-os="mac">
+          <p>Mac 은 보통 <strong>Git 기본 설치</strong> 됨. 안 되어 있으면 위의 <code>git --version</code> 입력 시
+            "Xcode Command Line Tools 를 설치하시겠습니까?" 다이얼로그가 자동으로 뜸 → <strong>설치</strong> 클릭 → 자동 진행 (5~10분).</p>
+          <p style="margin-top:12px">또는 Homebrew (이미 깐 사람):</p>
+          <pre><code>brew install git</code></pre>
+        </div>
+      </div>
+
+      <h3>1-2. (선택) 코드 에디터</h3>
+      <p>이 자습서는 코드 거의 안 만짐 — <strong>설치 불필요</strong>.
+        나중에 코드 보고 싶을 때만 <a href="https://code.visualstudio.com/" target="_blank">VS Code</a> 또는 메모장 사용.</p>
+
+      <div class="info">
+        <strong>📌 정리 — Step 1 끝나면 다음이 작동해야 합니다</strong>
+        <pre style="margin:8px 0 0"><code>git --version     → git version 2.x.x   (필수)</code></pre>
+        Git만 OK면 Step 2 진행. 코드 빌드/실행은 Vercel이 클라우드에서 자동으로 처리합니다.
+      </div>
+    </section>
+
+    <!-- STEP 2 -->
+    <section id="step-2">
+      <h2><span class="step-num">2</span>GitHub 가입 + Git 설정</h2>
+
+      <h3>2-1. GitHub 가입 (이미 있으면 건너뛰기)</h3>
+      <ol>
+        <li><a href="https://github.com/signup" target="_blank">https://github.com/signup</a> 접속</li>
+        <li>이메일 → 비밀번호 → 사용자명 입력</li>
+        <li>이메일 인증 완료</li>
+      </ol>
+
+      <h3>2-2. Git에 GitHub 계정 등록 (최초 1회)</h3>
+      <pre><code>git config --global user.name "본인_GitHub_사용자명"
+git config --global user.email "본인_이메일@example.com"</code></pre>
+
+      <div class="tip">
+        <strong>💡 레포 생성은 Step 5에서</strong>
+        본인 봇 레포는 Step 5 에서 만듭니다 (클론 + 셋업 끝낸 다음). 지금은 GitHub 계정 + Git 설정만.
+      </div>
+    </section>
+
+    <!-- STEP 3 (DIFFERENT) -->
+    <section id="step-3">
+      <h2><span class="step-num">3</span>템플릿 클론 + 로컬 실행</h2>
+
+      <div class="info">
+        <strong>⭐ 이 단계 핵심</strong>
+        <code>cha-bot-starterkit</code> 을 클론합니다 (Team Edition: 서버 사이드 RAG + Gemma4 무료 백엔드).
+      </div>
+
+      <h3>3-1. 작업 폴더로 이동</h3>
+
+      <div class="os-tabs">
+        <div class="tab-nav">
+          <button class="tab-btn" data-os="win">🪟 Windows</button>
+          <button class="tab-btn" data-os="mac">🍎 Mac</button>
+        </div>
+        <div class="tab-panel" data-os="win">
+          <pre><code>cd C:\projects
+mkdir my-bot
+cd my-bot</code></pre>
+          <p style="font-size:13px;color:#6b7280;margin-top:8px"><code>C:\projects</code> 폴더가 없으면 먼저 만들기: <code>mkdir C:\projects</code></p>
+        </div>
+        <div class="tab-panel" data-os="mac">
+          <pre><code>cd ~/projects
+mkdir my-bot
+cd my-bot</code></pre>
+          <p style="font-size:13px;color:#6b7280;margin-top:8px"><code>~/projects</code> 폴더가 없으면 먼저 만들기: <code>mkdir ~/projects</code></p>
+        </div>
+      </div>
+
+      <h3>3-2. 템플릿 클론</h3>
+      <pre><code>git clone https://github.com/sungbongju/cha-bot-starterkit.git .</code></pre>
+
+      <div class="warn">
+        <strong>⚠️ 주의</strong>
+        마지막에 <code>.</code> (점) 있음. 현재 폴더에 클론하라는 뜻. 점 빼면 <code>cha-bot-starterkit/</code> 하위 폴더가 새로 생깁니다.
+      </div>
+
+      <h3>3-3. 기존 .git 폴더 삭제 (내 레포로 새로 시작)</h3>
+
+      <div class="os-tabs">
+        <div class="tab-nav">
+          <button class="tab-btn" data-os="win">🪟 Windows</button>
+          <button class="tab-btn" data-os="mac">🍎 Mac</button>
+        </div>
+        <div class="tab-panel" data-os="win">
+          <pre><code>rmdir /s /q .git
+git init -b main</code></pre>
+        </div>
+        <div class="tab-panel" data-os="mac">
+          <pre><code>rm -rf .git
+git init -b main</code></pre>
+        </div>
+      </div>
+
+      <p>원본 템플릿의 git 히스토리를 끊고, 본인 레포로 다시 시작합니다.</p>
+
+      <div class="info">
+        <strong>📂 지금 폴더 구조</strong>
+<pre style="margin:8px 0 0">my-bot/                       ← 본인 작업 폴더 (계속 여기서 작업)
+  ├─ public/
+  │   └─ avatar.vrm           ← Step 8에서 본인 VRM 여기에 넣음
+  ├─ src/                     ← 코드 (수정 안 해도 됨!)
+  ├─ api/                     ← Vercel 서버리스 함수
+  ├─ index.html
+  └─ package.json</pre>
+      </div>
+
+    </section>
+
+    <!-- STEP 4 (DIFFERENT) -->
+    <section id="step-4">
+      <h2><span class="step-num">4</span>환경 변수 설정 (.env)</h2>
+
+      <div class="info">
+        <strong>⭐ 이 단계 핵심</strong>
+        OpenAI API 키 <strong>불필요</strong>. 대신 <code>TEAM_ID</code>(본인 팀 번호)와 <code>VITE_KAKAO_JS_KEY</code> 만 필요.
+      </div>
+
+      <div class="info">
+        <strong>📌 이 단계가 하는 일</strong>
+        본인 팀 번호 (TEAM_ID) 와 카카오 키 (VITE_KAKAO_JS_KEY) 두 가지를 메모해두는 단계입니다.
+        실제 등록은 <strong>Step 6 (Vercel 배포)</strong> 에서 진행합니다 — 로컬에서 코드 실행 안 하므로 <code>.env</code> 파일은 만들 필요 없습니다.
+      </div>
+
+      <h3>4-1. 본인 팀 번호 확인</h3>
+      <p>16팀 매핑 — 본인 팀 찾기:</p>
+      <table>
+        <tr><th>팀 번호</th><th>봇 이름</th><th>학생</th></tr>
+        <tr><td>01</td><td>🍚 식구</td><td>김수연</td></tr>
+        <tr><td>02</td><td>🚕 택씨</td><td>최문혁</td></tr>
+        <tr><td>03</td><td>📊 분개해</td><td>21학번 F5</td></tr>
+        <tr><td>04</td><td>⚠️ 잠깐만</td><td>김리원</td></tr>
+        <tr><td>05</td><td>⛵ 장보고</td><td>김영연</td></tr>
+        <tr><td>06</td><td>Δ 그릭</td><td>에브리옵션</td></tr>
+        <tr><td>07</td><td>🎾 나달</td><td>박시영</td></tr>
+        <tr><td>08</td><td>🎴 핀포커</td><td>핀포커스</td></tr>
+        <tr><td>09</td><td>🛡️ 지키미</td><td>첫 단추</td></tr>
+        <tr><td>10</td><td>💨 숨돌이</td><td>싹쓰리</td></tr>
+        <tr><td>11</td><td>🌾 곳간이</td><td>섭섭헌 진우</td></tr>
+        <tr><td>12</td><td>🎣 출조각</td><td>이성채</td></tr>
+        <tr><td>13</td><td>🌱 새로미</td><td>임예영</td></tr>
+        <tr><td>14</td><td>🏪 상도</td><td>지소윤</td></tr>
+        <tr><td>15</td><td>🤗 토닥이</td><td>권서영</td></tr>
+        <tr><td>16</td><td>🌿 하루</td><td>김하은</td></tr>
+      </table>
+
+      <div class="danger">
+        <strong>🚨 절대 주의</strong>
+        <code>.env</code> 파일은 GitHub에 올라가면 안 됩니다!<br>
+        <code>.gitignore</code>에 <code>.env</code>가 이미 포함되어 있는지 확인하세요.
+      </div>
+
+      <div class="tip">
+        <strong>💡 카카오 키는 Step 7에서</strong>
+        카카오 키는 아직 발급 전입니다. 일단 본인 팀 번호만 기억해두고 Step 5로 넘어가세요. 카카오 키는 Step 7에서 발급받고 Step 6에서 Vercel에 함께 등록합니다.
+      </div>
+    </section>
+
+    <!-- STEP 5 -->
+    <section id="step-5">
+      <h2><span class="step-num">5</span>본인 GitHub 레포 만들기 + 푸시</h2>
+
+      <h3>5-1. GitHub 에서 빈 레포 만들기 (브라우저)</h3>
+      <ol>
+        <li><a href="https://github.com/new" target="_blank">https://github.com/new</a> 접속</li>
+        <li><strong>Repository name</strong>: 본인 봇 이름 (예: <code>my-bot</code>)</li>
+        <li><strong>Public</strong> 선택</li>
+        <li><strong>체크박스 모두 OFF</strong> — README, .gitignore, license 다 끄기 (켜면 push 시 충돌)</li>
+        <li><code>Create repository</code> 클릭</li>
+        <li>생성된 페이지 URL 복사: <code>https://github.com/본인_사용자명/my-bot.git</code></li>
+      </ol>
+
+      <h3>5-2. (선택) README 수정</h3>
+      <p>메모장으로 <code>README.md</code> 열기 → 본인 봇 이름과 설명으로 수정. 안 해도 됨.</p>
+
+      <h3>5-3. Git에 커밋</h3>
+      <pre><code>git add .
+git commit -m "Initial commit: 내 봇 시작"</code></pre>
+
+      <h3>5-4. 본인 GitHub 레포와 연결 + 푸시</h3>
+      <pre><code>git remote add origin https://github.com/본인_사용자명/my-bot.git
+git push -u origin main</code></pre>
+
+      <p>처음 푸시할 때 GitHub 로그인 창이 뜹니다. 브라우저에서 본인 계정으로 인증하면 자동 푸시됩니다.</p>
+
+      <div class="warn">
+        <strong>⚠️ 학생들 흔한 에러 — "Updates were rejected" 또는 "remote rejected"</strong>
+        보통 5-1에서 체크박스를 켜서 (README 자동 생성) 발생합니다. 해결: <code>git pull origin main --allow-unrelated-histories</code> 후 다시 <code>git push</code>.
+      </div>
+
+      <div class="tip">
+        <strong>💡 매번 푸시할 때</strong>
+        수정 후에는 다음 3줄만 반복:
+        <pre><code>git add .
+git commit -m "수정 내용"
+git push</code></pre>
+      </div>
+
+      <div class="warn">
+        <strong>⚠️ remote URL 정확히 확인</strong>
+        <code>git remote add origin ...</code> 명령에서 URL의 <strong>본인_사용자명</strong> 부분을 정확히 박으세요.
+        예) GitHub 사용자명이 <code>kim-soyeon</code> 이면 <code>https://github.com/kim-soyeon/my-bot.git</code>.
+        잘못 박으면 권한 없는 다른 레포로 push 시도해서 막힙니다.
+      </div>
+    </section>
+
+    <!-- STEP 6 (DIFFERENT — TEAM_ID env) -->
+    <section id="step-6">
+      <h2><span class="step-num">6</span>Vercel 배포</h2>
+
+      <div class="info">
+        <strong>⭐ 이 단계 핵심</strong>
+        OpenAI 키 대신 <code>TEAM_ID</code> 환경변수 설정. (Gemma4는 미들턴 공유 = 키 불필요)
+      </div>
+
+      <h3>6-1. Vercel 가입</h3>
+      <ol>
+        <li><a href="https://vercel.com/signup" target="_blank">https://vercel.com/signup</a> 접속</li>
+        <li><strong>"Continue with GitHub"</strong> 선택 → GitHub 권한 승인</li>
+        <li>(첫 가입 시) <strong>SMS 인증</strong> 화면 — 본인 휴대폰 번호 입력 → 4자리 코드 받아 입력</li>
+        <li>가입 완료 → Vercel 대시보드 진입</li>
+      </ol>
+
+      <div class="warn">
+        <strong>⚠️ 학생 흔한 마찰점 — Vercel 첫 가입 시 추가 단계</strong>
+        <ul style="margin:6px 0">
+          <li><strong>SMS 인증</strong>: 본인 폰번호로 4자리 코드 (의무, 1분 소요)</li>
+          <li><strong>이름/팀 입력</strong>: "First Name" "Hobby" 같은 입력 — 대충 채워도 OK</li>
+          <li><strong>유료 플랜 추천 팝업</strong>: <code>Continue with Hobby</code> (무료) 선택 — 학생 봇엔 무료로 충분</li>
+        </ul>
+      </div>
+
+      <h3>6-2. 프로젝트 배포</h3>
+      <ol>
+        <li>대시보드에서 <code>Add New</code> → <code>Project</code></li>
+        <li>본인 GitHub 레포 안 보이면 → <code>Adjust GitHub App Permissions</code> 클릭:
+          <ul>
+            <li>"Install Vercel" GitHub 앱 권한 설정 화면 열림</li>
+            <li><strong>Only select repositories</strong> 선택 → 본인 레포 (예: <code>my-bot</code>) 체크</li>
+            <li>또는 <strong>All repositories</strong> 선택 (간단, 모든 본인 레포 접근 허용)</li>
+            <li><code>Install</code> 또는 <code>Save</code> 클릭 → 자동으로 Vercel Import 화면 복귀</li>
+          </ul>
+        </li>
+        <li>본인 레포 (<code>my-bot</code>) → <code>Import</code></li>
+        <li>Framework Preset: <strong>Vite</strong> 자동 인식</li>
+        <li><strong>Environment Variables</strong> 펼치기 → 다음 2개 추가:
+          <table>
+            <tr><th>Name</th><th>Value</th></tr>
+            <tr><td><code>TEAM_ID</code></td><td><code>03</code> (본인 팀 번호 2자리)</td></tr>
+            <tr><td><code>VITE_KAKAO_JS_KEY</code></td><td>Step 7에서 발급할 키 (지금은 임시값 가능)</td></tr>
+          </table>
+        </li>
+        <li><code>Deploy</code> 클릭</li>
+      </ol>
+
+      <div class="warn">
+        <strong>⚠️ "내 레포가 안 보여요" 해결</strong>
+        Vercel은 처음에 GitHub의 일부 권한만 갖고 있어서 모든 레포가 안 보입니다.
+        Import 화면에 <code>Adjust GitHub App Permissions</code> (또는 <code>Configure GitHub App</code>) 링크가 있어요.
+        클릭 → GitHub 앱 설치 화면 → 본인 레포 권한 부여 → 자동 복귀.
+      </div>
+
+      <h3>6-3. 완료!</h3>
+      <p>1~3분 후 <code>https://my-bot.vercel.app</code> 같은 URL이 생성됩니다.</p>
+
+      <div class="info">
+        <strong>💡 URL에 이상한 단어가 붙어있나요? (예: <code>my-bot-self-psi.vercel.app</code>)</strong>
+        Vercel은 URL이 다른 사용자와 충돌하면 자동으로 단어를 추가합니다. 정상이에요.
+        깔끔하게 바꾸려면 Vercel 대시보드 → <code>Settings</code> → <code>General</code> → <code>Project Name</code> 변경 (URL도 같이 바뀜).<br>
+        ⚠️ URL 바꾸면 Step 7 에서 카카오 도메인 등록도 새 URL로 다시 해야 함.
+      </div>
+
+      <div class="warn">
+        <strong>📌 본인 Vercel URL 메모해두세요</strong>
+        Step 7 (카카오), Step 9 (RAG), Step 10 (공유) 모두에서 이 URL이 필요합니다. 메모장에 임시 저장.
+      </div>
+
+      <div class="tip">
+        <strong>💡 자동 재배포</strong>
+        앞으로 GitHub에 푸시할 때마다 Vercel이 자동 재배포합니다.
+      </div>
+    </section>
+
+    <!-- STEP 7 -->
+    <section id="step-7">
+      <h2><span class="step-num">7</span>카카오 SDK 설정 (로그인 + 공유)</h2>
+
+      <p>한 번의 셋업으로 두 가지가 활성화됩니다:</p>
+      <ul>
+        <li><strong>카카오 로그인</strong> — 사용자가 봇 첫 방문 시 자동으로 로그인 모달 (AuthModal) 이 뜸. 카카오 계정 또는 이메일로 가입/로그인 가능.</li>
+        <li><strong>카카오 공유</strong> — 봇을 카카오톡으로 친구에게 공유 가능.</li>
+      </ul>
+
+      <div class="info">
+        <strong>💡 사용자 흐름</strong>
+        학생 봇 접속자 → 자동 로그인 모달 표시 → 카카오 또는 이메일 선택 → 가입 완료 → 봇과 대화.<br>
+        로그인 기록은 학교 서버에 저장 (채팅 히스토리 추적용).
+      </div>
+
+      <h3>7-1. Kakao Developers 가입 및 앱 생성</h3>
+      <ol>
+        <li><a href="https://developers.kakao.com/" target="_blank">https://developers.kakao.com/</a> 접속</li>
+        <li>카카오 계정으로 로그인</li>
+        <li><code>내 애플리케이션</code> → <code>애플리케이션 추가하기</code></li>
+        <li>앱 이름 입력 (본인 봇 이름, 예: "내 봇") + 사업자명 (본인 이름) → 생성</li>
+      </ol>
+
+      <h3>7-2. JavaScript 키 복사</h3>
+      <p>앱 선택 → <code>요약 정보</code> → <strong>JavaScript 키</strong> 복사 (32자리 영숫자)</p>
+
+      <h3>7-3. 사이트 도메인 등록 (필수)</h3>
+      <ol>
+        <li>좌측 <code>플랫폼</code> → <code>Web 플랫폼 등록</code></li>
+        <li>사이트 도메인에 본인 Vercel URL 입력:
+          <pre><code>https://my-bot.vercel.app</code></pre>
+        </li>
+        <li><strong>저장</strong> 클릭 — 등록 안 하면 카카오 SDK 작동 안 함</li>
+      </ol>
+
+      <h3>7-4. 카카오 로그인 활성화 (필수)</h3>
+      <ol>
+        <li>좌측 <code>제품 설정</code> → <code>카카오 로그인</code></li>
+        <li><strong>활성화 설정</strong>: ON</li>
+        <li><strong>Redirect URI</strong> 등록: <code>https://my-bot.vercel.app/oauth</code> (사용 안 해도 등록 필요)</li>
+        <li><strong>동의 항목</strong> 설정: <code>닉네임</code> 필수, <code>이메일</code> 선택 (사용자가 거부 가능)</li>
+      </ol>
+
+      <div class="warn">
+        <strong>⚠️ 학생 흔한 실수</strong>
+        Step 7-4 의 "카카오 로그인 활성화" 안 하면 봇 첫 방문 시 로그인 모달에서 카카오 버튼 누르면 에러 ("앱 정보가 정확하지 않음"). 반드시 활성화하세요.
+      </div>
+
+      <h3>7-5. Vercel 환경변수 업데이트 + Redeploy</h3>
+      <ol>
+        <li>Vercel 대시보드 → 본인 프로젝트 → <code>Settings</code> → <code>Environment Variables</code></li>
+        <li><code>VITE_KAKAO_JS_KEY</code> 항목 우측 <code>⋯</code> → <code>Edit</code></li>
+        <li>값을 7-2에서 복사한 JavaScript 키 (32자리)로 교체 → <code>Save</code></li>
+        <li><code>Deployments</code> 탭 → 최상단 배포 → <code>⋯</code> → <code>Redeploy</code> 클릭</li>
+        <li>2~3분 후 배포 완료</li>
+      </ol>
+
+      <h3>7-6. 동작 확인</h3>
+      <ol>
+        <li>본인 Vercel URL 접속</li>
+        <li>자동으로 로그인 모달이 뜸</li>
+        <li><strong>카카오로 로그인</strong> 클릭 → 카카오 인증 팝업</li>
+        <li>권한 동의 → 모달 자동 닫힘 → 봇과 대화 시작 가능</li>
+      </ol>
+
+      <div class="info">
+        <strong>💡 코드 수정 불필요</strong>
+        Team Edition 은 카카오 키를 <code>index.html</code>에 박지 않고 환경변수로 받습니다.
+        Vercel env 만 바꾸면 즉시 반영.
+      </div>
+    </section>
+
+    <!-- STEP 8 — VRoid 아바타 (먼저 시각 확인) -->
+    <section id="step-8">
+      <h2><span class="step-num">8</span>VRoid 아바타 적용 🎨</h2>
+
+      <div class="info">
+        <strong>💡 왜 아바타가 먼저?</strong>
+        봇 페이지에서 본인 캐릭터가 등장하는 걸 먼저 확인 → 동기 부여 ↑.
+        지식(RAG)은 그 다음 단계에서 천천히 추가합니다.
+      </div>
+
+      <p>봇의 3D 캐릭터를 본인 봇 컨셉에 맞게 만듭니다. <strong>두 가지 경로</strong>:</p>
+
+      <table>
+        <tr><th></th><th>🚀 빠른 경로 (10분)</th><th>🎨 정공법 (30분~1시간)</th></tr>
+        <tr><td>방법</td><td>VRoid Hub에서 무료 VRM 다운</td><td>VRoid Studio로 직접 제작</td></tr>
+        <tr><td>설치</td><td>없음 (브라우저만)</td><td>VRoid Studio 1GB 다운</td></tr>
+        <tr><td>커스터마이즈</td><td>제한적</td><td>완전 자유</td></tr>
+        <tr><td>추천 대상</td><td>시연 우선 / 빠르게 끝내고 싶음</td><td>본인 봇 컨셉 100% 반영</td></tr>
+      </table>
+
+      <h3>🚀 빠른 경로: VRoid Hub에서 다운로드</h3>
+      <ol>
+        <li><a href="https://hub.vroid.com/" target="_blank">https://hub.vroid.com/</a> 접속</li>
+        <li>우측 필터 → <strong>License</strong> → <strong>Allow Redistribution</strong> 체크 (재배포 허용된 모델만)</li>
+        <li>마음에 드는 캐릭터 클릭 → <strong>Download</strong> → <code>.vrm</code> 파일 받기</li>
+        <li>다운로드된 파일을 본인 프로젝트로 옮기는 건 <strong>8-5</strong> 진행</li>
+      </ol>
+
+      <div class="tip">
+        <strong>💡 라이선스 주의</strong>
+        "Allow Redistribution" 표시 없는 모델은 공개 봇에 쓰면 안 됩니다 (저작권 위반).
+        필터 적용 후 받은 모델은 안전.
+      </div>
+
+      <hr style="margin:32px 0;border:none;border-top:1px solid var(--border)" />
+
+      <h3>🎨 정공법 8-1. VRoid Studio 다운로드 + 설치</h3>
+      <ol>
+        <li><a href="https://vroid.com/en/studio" target="_blank">https://vroid.com/en/studio</a> 접속</li>
+        <li>Windows / Mac 버전 다운로드 (무료, 약 1GB)</li>
+        <li>설치 후 실행 — 처음 켜면 튜토리얼 영상 자동 재생 (스킵 가능)</li>
+      </ol>
+
+      <h3>🎨 정공법 8-2. 첫 화면 + 기본 캐릭터 선택</h3>
+      <ol>
+        <li>왼쪽 위 <code>+ New</code> 버튼 클릭</li>
+        <li>샘플 캐릭터 중 하나 선택:
+          <ul>
+            <li><strong>AvatarSample_A</strong> (여성, 단정한 학생) → 분개해/지키미/토닥이 같은 봇에 추천</li>
+            <li><strong>AvatarSample_B</strong> (남성, 활동적) → 나달/장보고 같은 봇에 추천</li>
+            <li><strong>AvatarSample_F</strong> (귀여운 캐릭터) → 식구/숨돌이/하루 같은 봇에 추천</li>
+          </ul>
+        </li>
+        <li>편집 화면 진입 — 좌측에 메뉴 카테고리들 표시됨</li>
+      </ol>
+
+      <h3>🎨 정공법 8-3. 캐릭터 커스터마이즈</h3>
+      <p>좌측 메뉴 카테고리별로 수정:</p>
+      <table>
+        <tr><th>메뉴</th><th>설명</th><th>학생 팁</th></tr>
+        <tr><td><strong>Face (얼굴)</strong></td><td>눈, 코, 입, 윤곽</td><td>처음이면 기본값 사용 권장</td></tr>
+        <tr><td><strong>Hair (헤어)</strong></td><td>스타일, 색상, 길이</td><td>색상만 바꿔도 개성 확 살아남</td></tr>
+        <tr><td><strong>Body (몸)</strong></td><td>키, 체형</td><td>기본값 OK. 너무 만지면 비례 깨짐</td></tr>
+        <tr><td><strong>Outfit (의상)</strong></td><td>옷, 신발</td><td>봇 컨셉 반영하기 좋은 곳 — 한복/정장/캐주얼</td></tr>
+        <tr><td><strong>Accessories (액세서리)</strong></td><td>안경, 모자</td><td>안경 하나 추가만으로 분위기 변화</td></tr>
+      </table>
+
+      <div class="tip">
+        <strong>💡 봇 컨셉별 디자인 가이드</strong>
+        <ul style="margin:6px 0">
+          <li><strong>분개해</strong> (회계 학습): 단정한 학생 룩, 안경 + 단발머리</li>
+          <li><strong>상도</strong> (전통 상인): 한복 + 정장 혼합</li>
+          <li><strong>토닥이</strong> (정서 케어): 따뜻한 색 (핑크/파스텔), 부드러운 헤어</li>
+          <li><strong>장보고</strong> (해상 무역): 활동적 의상, 짧은 머리</li>
+          <li><strong>식구</strong> (한식): 한복 또는 셰프 복장, 친근한 표정</li>
+        </ul>
+      </div>
+
+      <h3>🎨 정공법 8-4. VRM으로 Export</h3>
+      <ol>
+        <li>좌측 상단 <code>☰</code> (햄버거 메뉴) 클릭 → <code>Export</code> → <code>Export as VRM</code></li>
+        <li><strong>VRM 1.0</strong> 선택 (VRM 0.x 는 일부 기능 호환 안 됨)</li>
+        <li><strong>라이선스 화면</strong>에서 다음 4가지 반드시 설정:
+          <ul>
+            <li><strong>Avatar Permission</strong>: <code>Everyone</code> (모두 사용 가능)</li>
+            <li><strong>Commercial Usage</strong>: <code>Allow</code> (시연/배포 위해 필수)</li>
+            <li><strong>Modification</strong>: <code>Allow</code></li>
+            <li><strong>Redistribution</strong>: <code>Allow</code></li>
+          </ul>
+        </li>
+        <li><strong>파일명</strong>: 본인이 원하는 이름 OK — 다음 단계에서 어차피 <code>avatar.vrm</code> 으로 바꿉니다</li>
+        <li><strong>저장 위치 기억!</strong> 보통 <code>Desktop</code> 또는 <code>Documents\VRoid\avatars</code></li>
+      </ol>
+
+      <div class="warn">
+        <strong>⚠️ 라이선스 모두 "Allow" 안 하면 시연/공유 불가</strong>
+        4가지 중 하나라도 "Deny" 면 봇 공개 못 함 (저작권 위반).
+        본인이 만든 캐릭터니까 다 Allow 해주세요.
+      </div>
+
+      <hr style="margin:32px 0;border:none;border-top:1px solid var(--border)" />
+
+      <h3>8-5. 프로젝트에 적용 (두 경로 공통) ⚠️ 파일명 정확히 <code>avatar.vrm</code></h3>
+
+      <div class="danger">
+        <strong>🚨 파일명 규칙 (어기면 봇이 못 찾음)</strong>
+        <ul style="margin:6px 0">
+          <li>이름: 반드시 <code>avatar.vrm</code> (모두 소문자, <strong>한글 X</strong>)</li>
+          <li>위치: <code>C:\projects\my-bot\public\avatar.vrm</code></li>
+          <li>코드가 정확히 <code>/avatar.vrm</code> 으로 fetch함 — 이름 다르면 placeholder 표시</li>
+        </ul>
+      </div>
+
+      <p>탐색기에서 VRM 파일을 <code>public/</code> 폴더에 복사하고 이름을 <code>avatar.vrm</code> 으로 변경. 그 다음 CMD에서:</p>
+
+      <pre><code>cd C:\projects\my-bot
+git add .
+git commit -m "avatar.vrm 추가"
+git push origin main</code></pre>
+
+      <p>1~3분 후 Vercel 자동 재배포 → 새 아바타 등장.</p>
+
+      <div class="warn">
+        <strong>⚠️ "no upstream branch" 에러가 나면</strong>
+        <code>git push -u origin main</code> 로 한 번만 upstream 설정. 이후 <code>git push</code> 만으로 OK.
+      </div>
+
+      <div class="warn">
+        <strong>⚠️ VRM 파일이 25MB 초과면 git push 막힘</strong>
+        VRoid Studio 에서 텍스처 크기 줄여 (Materials → Texture Resolution 낮춤) 재 export.
+      </div>
+    </section>
+
+    <!-- STEP 9 — RAG 페이지 (페르소나 + 지식 통합) -->
+    <section id="step-9">
+      <h2><span class="step-num">9</span>RAG 페이지: 페르소나 + 지식 ⭐</h2>
+
+      <div class="info">
+        <strong>⭐ 이 자습서의 핵심 기능</strong>
+        한 페이지에서 봇의 <strong>성격(페르소나)</strong> + <strong>지식(RAG 청크)</strong> 둘 다 관리.
+        SSH/Node 스크립트 사용 안 함. 텍스트만 붙여넣으면 AI가 자동 변환.
+      </div>
+
+      <h3>9-1. 본인 팀 RAG 관리 페이지 접속</h3>
+      <p>운영자가 16팀 URL 전달. 예시 (분개해 = team_03):</p>
+      <pre><code>https://middleton.p-e.kr/finbot/team/03/rag</code></pre>
+      <p>본인 팀 번호 두 자리로 바꿔서 접속하세요 (예: <code>team/01/rag</code>, <code>team/15/rag</code>).</p>
+
+      <div class="info">
+        <strong>📌 페이지 구성</strong>
+        <ul style="margin:6px 0">
+          <li><strong>🎭 PERSONA</strong> (보라색) — 봇이 누구인지, 어떻게 답하는지</li>
+          <li><strong>✨ AUTO_CHUNKER</strong> (시안색) — 봇이 무엇을 답하는지 (지식)</li>
+          <li><strong>📚 RAG_CHUNKS</strong> (마젠타) — 등록된 청크 리스트</li>
+        </ul>
+      </div>
+
+      <hr style="margin:32px 0;border:none;border-top:1px solid var(--border)" />
+
+      <h3>9-2. 🎭 PERSONA 설정 (봇의 성격 · 말투 · 정체성)</h3>
+
+      <ol>
+        <li>최상단 보라색 <strong>PERSONA</strong> 박스의 textarea</li>
+        <li>본인 봇 정체성을 자유 서술 (최대 2000자)</li>
+        <li><code>COMMIT</code> 버튼 클릭 → 다음 채팅부터 즉시 반영</li>
+        <li>비우고 <code>RESET</code> 누르면 기본값 (봇 이름 + 친절한 어시스턴트) 으로 복귀</li>
+      </ol>
+
+      <h4>예시 페르소나 (참고용 — 본인 봇 컨셉으로 작성)</h4>
+
+      <p style="margin-top:8px"><strong>학습 친구형 (반말, 친근)</strong>:</p>
+      <pre><code>당신은 [본인 봇 이름] 봇입니다.
+[학생/사용자]가 [주제]를 어려워하면 차근차근 단계별로 풀어주세요.
+반말로 친근하게, 이모티콘은 가끔만 사용해요.
+모르는 것은 솔직히 모른다고 답합니다.</code></pre>
+
+      <p style="margin-top:12px"><strong>위로 친구형 (존댓말, 따뜻함)</strong>:</p>
+      <pre><code>당신은 [본인 봇 이름] 봇입니다.
+사용자가 힘든 이야기를 하면 판단하지 않고 공감해주세요.
+"그랬군요", "많이 힘드셨겠어요" 같은 공감 표현을 자주 사용해요.
+조언보다 들어주는 것을 우선하고, 부드러운 존댓말로 대화합니다.
+가끔 따뜻한 이모지 (🌸 💛 ☁️) 사용.</code></pre>
+
+      <p style="margin-top:12px"><strong>전문가형 (존댓말, 정확성 우선)</strong>:</p>
+      <pre><code>당신은 [본인 봇 이름] — [전문 분야] 전문 안내 봇입니다.
+사용자 질문에 정확하고 간결하게 답하세요.
+답변 형식: 핵심 결론 먼저, 그 다음 1~2문장 설명, 필요 시 예시.
+출처가 불명확한 정보는 추측하지 말고 "확인이 필요합니다" 라고 답합니다.</code></pre>
+
+      <h4>좋은 페르소나 4가지 요소</h4>
+      <table>
+        <tr><th>요소</th><th>예시</th></tr>
+        <tr><td><strong>정체성</strong></td><td>"당신은 [본인 봇 이름] 봇입니다"</td></tr>
+        <tr><td><strong>말투</strong></td><td>"반말로 친근하게" / "존댓말로 정중히" / "전문가 톤으로"</td></tr>
+        <tr><td><strong>답변 스타일</strong></td><td>"간결하게 2~3문장" / "예시 들어가며 자세히"</td></tr>
+        <tr><td><strong>가치관/태도</strong></td><td>"모르면 모른다고 답함" / "추측 X" / "이모티콘 가끔"</td></tr>
+      </table>
+
+      <div class="tip">
+        <strong>💡 페르소나 떠오르지 않으면 AI 도움</strong>
+        ChatGPT/Claude에 부탁:
+        <pre><code>"[본인 봇 주제] 봇의 페르소나를
+시스템 프롬프트로 작성해줘. 300자 이내, 반말 톤."</code></pre>
+        → 결과를 textarea에 붙여넣고 COMMIT.
+      </div>
+
+      <hr style="margin:32px 0;border:none;border-top:1px solid var(--border)" />
+
+      <h3>9-3. ✨ AUTO_CHUNKER 로 지식 추가 (가장 핵심) ⭐</h3>
+      <p>학생 입장에서 가장 쉬운 방법. JSONL 형식 몰라도 됨. 평범한 텍스트만 던지면 AI가 알아서 Q&A 청크로 변환.</p>
+
+      <ol>
+        <li>본인 봇 주제 텍스트 준비 (뉴스 기사, 강의 노트, 위키, 책 한 챕터 등)</li>
+        <li>시안색 <strong>AUTO_CHUNKER</strong> 박스에서:
+          <ul>
+            <li>방법 A: <code>▸ upload .txt or .md</code> 클릭 → 파일 선택</li>
+            <li>방법 B: textarea에 텍스트 직접 붙여넣기</li>
+          </ul>
+        </li>
+        <li><code>GENERATE CHUNKS</code> 버튼 클릭</li>
+        <li>30초~1분 대기 (Gemma4가 분석)</li>
+        <li>✨ 생성된 청크 5~25개 미리보기 (PREVIEW)</li>
+        <li><code>COMMIT TO RAG</code> 클릭 → 봇에 즉시 반영. 마음에 안 들면 <code>RETRY</code>.</li>
+      </ol>
+
+      <div class="tip">
+        <strong>💡 텍스트 분량 가이드</strong>
+        한 번에 <strong>500~5,000자</strong> 권장 (청크 5~15개 생성). 너무 길면 (>10,000자) 나눠서 업로드.
+        최대 30,000자.
+      </div>
+
+      <div class="info">
+        <strong>📌 다른 팀에 영향 없음</strong>
+        본인 팀 URL로 들어가면 본인 팀 파일에만 저장. 16팀 데이터는 완전 격리.
+      </div>
+
+      <div class="warn">
+        <strong>⚠️ 한글 깨짐 주의 — .txt/.md 파일은 UTF-8 인코딩</strong>
+        Windows 메모장 기본 저장 (ANSI) 으로 하면 한글 깨짐. VS Code 권장 (자동 UTF-8).
+        메모장이라면 "다른 이름으로 저장" 시 하단 인코딩 드롭다운 → <strong>UTF-8</strong>.
+      </div>
+
+      <hr style="margin:32px 0;border:none;border-top:1px solid var(--border)" />
+
+      <h3>9-4. 봇에서 확인</h3>
+      <p>본인 봇 사이트 (<code>https://[본인-vercel-url].vercel.app</code>) 새로고침 → 채팅 → 청크 활용 답변 확인.</p>
+
+      <p>예시 (분개해 봇 청크 추가 후):</p>
+      <ul>
+        <li>"비품을 30만원에 외상으로 샀어. 분개해줘"</li>
+        <li>"직원 월급 250만원 줬어"</li>
+        <li>"은행에서 1000만원 빌렸어"</li>
+      </ul>
+
+      <p>예시 (토닥이 봇 청크 추가 후):</p>
+      <ul>
+        <li>"요즘 너무 힘들어요"</li>
+        <li>"불안할 때 어떻게 해요?"</li>
+        <li>"번아웃이 온 것 같아요"</li>
+      </ul>
+    </section>
+
+    <!-- STEP 10 — 완성 & 공유 -->
+    <section id="step-10">
+      <h2><span class="step-num">10</span>완성! 봇 공유하기 🎉</h2>
+
+      <h3>10-1. 최종 체크리스트</h3>
+      <table>
+        <tr><th>항목</th><th>확인</th></tr>
+        <tr><td>GitHub 레포에 코드 푸시 완료</td><td>✅</td></tr>
+        <tr><td>Vercel 배포 성공 + TEAM_ID 환경변수 설정</td><td>✅</td></tr>
+        <tr><td>카카오 SDK 키 본인 것 (VITE_KAKAO_JS_KEY)</td><td>✅</td></tr>
+        <tr><td>VRoid 아바타 적용 (Step 8)</td><td>✅</td></tr>
+        <tr><td>페르소나 설정 (Step 9-2)</td><td>✅</td></tr>
+        <tr><td>RAG 청크 10개 이상 추가 (Step 9-3)</td><td>✅</td></tr>
+        <tr><td>봇 사이트에서 질문 → 페르소나 + RAG 반영 답변 확인</td><td>✅</td></tr>
+      </table>
+
+      <h3>10-2. 친구에게 공유</h3>
+      <p>Vercel URL을 카카오톡으로:</p>
+      <ul>
+        <li>URL: <code>https://my-bot.vercel.app</code></li>
+        <li>QR 생성: <a href="https://www.qr-code-generator.com" target="_blank">qr-code-generator.com</a></li>
+      </ul>
+
+      <h3>10-3. 개선 사이클</h3>
+      <ol>
+        <li>친구 피드백 수집 ("이런 질문에 답 못해" / "톤이 좀..." 등)</li>
+        <li>RAG 페이지에서:
+          <ul>
+            <li>지식 부족 → AUTO_CHUNKER로 청크 추가 (1분)</li>
+            <li>톤 부족 → PERSONA 수정 (10초)</li>
+          </ul>
+        </li>
+        <li>봇 사이트 새로고침 → 즉시 반영</li>
+        <li>반복!</li>
+      </ol>
+
+      <div class="tip">
+        <strong>🎉 축하합니다!</strong>
+        이제 본인만의 AI 친구 봇이 인터넷에 살아 있습니다. 🤖
+      </div>
+    </section>
+
+    <section>
+      <h2>📚 추가 자료</h2>
+      <ul>
+        <li><a href="https://github.com/sungbongju/cha-bot-starterkit">cha-bot-starterkit GitHub 레포</a></li>
+        <li><a href="https://react.dev/learn" target="_blank">React 공식 문서</a></li>
+        <li><a href="https://vroid.com/en/studio" target="_blank">VRoid Studio</a></li>
+        <li><a href="https://vercel.com/docs" target="_blank">Vercel 문서</a></li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>🆘 자주 겪는 문제</h2>
+
+      <h3>Q1: 봇 채팅이 작동하지 않습니다</h3>
+      <ul>
+        <li>Vercel 환경변수 <code>TEAM_ID</code> 가 본인 팀 번호로 설정되어 있는지 확인</li>
+        <li>Vercel <code>Deployments</code> → 최근 배포 로그에서 에러 확인</li>
+        <li>브라우저 콘솔(F12) 에서 빨간 메시지 확인</li>
+      </ul>
+
+      <h3>Q2: 다른 팀 URL로 들어가도 청크 추가가 되네요?</h3>
+      <ul>
+        <li>맞습니다 — 교내 교육용이라 인증 없음 (운영 정책: 보안 강조 X)</li>
+        <li>본인 팀 URL만 사용하세요 (사고 시 자동 백업으로 즉시 복구 가능)</li>
+        <li>한 번에 최대 200개 청크 제한 (스팸 방지)</li>
+      </ul>
+
+      <h3>Q3: 봇이 RAG 청크를 무시하고 일반 답변만 합니다</h3>
+      <ul>
+        <li>청크 추가 후 "총 N개" 메시지 확인 (실제 저장됐는지)</li>
+        <li>질문이 청크 question 과 의미적으로 비슷한지 (코사인 유사도 임계값)</li>
+        <li>청크 수가 너무 적으면 (5개 이하) 매칭이 안 잡힐 수 있음 — 30개 이상 권장</li>
+      </ul>
+
+      <h3>Q4: 카카오 공유 버튼이 작동하지 않음</h3>
+      <ul>
+        <li>Vercel 환경변수 <code>VITE_KAKAO_JS_KEY</code> 확인</li>
+        <li>Kakao Developers 의 Web 플랫폼에 Vercel URL 등록 확인</li>
+      </ul>
+
+      <h3>Q5: VRM 아바타가 안 보입니다 ("아바타가 비어있어요")</h3>
+      <ul>
+        <li><code>public/avatar.vrm</code> 파일 존재 + git 에 푸시됐는지 확인</li>
+        <li>Vercel <code>Deployments</code> → <code>Source</code> → <code>public/avatar.vrm</code> 있는지</li>
+      </ul>
+    </section>
+
+  </main>
+</div>
+
+<footer>
+  <p>cha-bot-starterkit (Team Edition) · 2026 BizModel Bots</p>
+  <p><a href="https://github.com/sungbongju/cha-bot-starterkit">GitHub</a></p>
+</footer>
+
+<script>
+  // OS 탭 (Windows / Mac) — 모든 .os-tabs 그룹 동기화 + localStorage 기억
+  document.addEventListener('DOMContentLoaded', () => {
+    const SAVED = localStorage.getItem('os-platform') || 'win';
+
+    function setPlatform(platform) {
+      document.querySelectorAll('.os-tabs').forEach((group) => {
+        group.querySelectorAll('.tab-btn').forEach((b) => {
+          b.classList.toggle('active', b.dataset.os === platform);
+        });
+        group.querySelectorAll('.tab-panel').forEach((p) => {
+          p.classList.toggle('active', p.dataset.os === platform);
+        });
+      });
+      localStorage.setItem('os-platform', platform);
+    }
+
+    // 초기 적용
+    setPlatform(SAVED);
+
+    // 클릭 핸들러 (모든 탭 그룹 한 번에)
+    document.querySelectorAll('.os-tabs .tab-btn').forEach((btn) => {
+      btn.addEventListener('click', () => setPlatform(btn.dataset.os));
+    });
+  });
+</script>
+
+<script>
+  // 모든 <pre> 코드블록에 복사 버튼 자동 추가
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('pre').forEach((pre) => {
+      // 이미 버튼 있으면 스킵 (중복 방지)
+      if (pre.querySelector('.copy-btn')) return;
+
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'copy-btn';
+      btn.setAttribute('aria-label', '코드 복사');
+      btn.innerHTML = '📋 복사';
+
+      btn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const code = pre.querySelector('code') || pre;
+        const text = code.innerText || code.textContent || '';
+        try {
+          await navigator.clipboard.writeText(text.trim());
+          btn.innerHTML = '✓ 복사됨';
+          btn.classList.add('copied');
+          setTimeout(() => {
+            btn.innerHTML = '📋 복사';
+            btn.classList.remove('copied');
+          }, 1500);
+        } catch (err) {
+          // 폴백: 구식 브라우저 / 권한 거부
+          try {
+            const ta = document.createElement('textarea');
+            ta.value = text.trim();
+            ta.style.position = 'fixed';
+            ta.style.opacity = '0';
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+            btn.innerHTML = '✓ 복사됨';
+            btn.classList.add('copied');
+            setTimeout(() => {
+              btn.innerHTML = '📋 복사';
+              btn.classList.remove('copied');
+            }, 1500);
+          } catch (fallbackErr) {
+            btn.innerHTML = '⚠ 실패';
+          }
+        }
+      });
+
+      pre.appendChild(btn);
+    });
+  });
+</script>
+
+</body>
+</html>

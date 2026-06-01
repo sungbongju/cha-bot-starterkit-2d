@@ -1,0 +1,13 @@
+.app {
+  display: flex;
+  height: 100vh;
+  height: 100dvh;        /* 모바일 Safari 주소창 보정 */
+  overflow: hidden;
+}
+
+/* ── 모바일 (≤768px): 위·아래 split ── */
+@media (max-width: 768px) {
+  .app {
+    flex-direction: column;
+  }
+}

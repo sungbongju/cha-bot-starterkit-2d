@@ -1,0 +1,537 @@
+.panel {
+  width: 45%;
+  display: flex;
+  flex-direction: column;
+  background: var(--panel);
+  border-left: 1px solid var(--border);
+  box-shadow: -8px 0 24px rgba(58, 40, 23, 0.05);
+  overflow: hidden;
+  z-index: 1;
+}
+
+/* 헤더 */
+.header {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  background: rgba(255,255,255,0.02);
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.headerIcon {
+  font-size: 16px;
+}
+
+.headerTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.2px;
+}
+
+.headerSub {
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 300;
+  background: rgba(255,255,255,0.05);
+  padding: 3px 10px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+}
+
+.userArea {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.userGreeting {
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.logoutBtn {
+  flex-shrink: 0;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.logoutBtn:hover {
+  border-color: var(--text);
+  color: var(--text);
+}
+
+.loginBtn {
+  background: var(--gold);
+  border: 1px solid var(--gold-dim);
+  color: #fff;
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.15s;
+  box-shadow: 0 2px 6px rgba(184, 138, 94, 0.25);
+}
+
+.loginBtn:hover {
+  background: var(--gold-dim);
+  transform: translateY(-1px);
+}
+
+.surveyBtn {
+  flex-shrink: 0;
+  background: rgba(184,138,94,0.12);
+  border: 1px solid rgba(184,138,94,0.45);
+  color: var(--gold);
+  border-radius: 6px;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-family: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.surveyBtn:hover {
+  background: rgba(184,138,94,0.22);
+}
+
+.themeBtn {
+  flex-shrink: 0;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 6px;
+  padding: 3px 8px;
+  font-size: 14px;
+  line-height: 1;
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.themeBtn:hover {
+  border-color: var(--text);
+  background: rgba(0,0,0,0.04);
+}
+
+[data-theme="dark"] .themeBtn:hover {
+  background: rgba(255,255,255,0.04);
+}
+
+/* 메시지 목록 */
+.messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* 메시지 행 */
+.msgRow {
+  display: flex;
+  gap: 10px;
+  animation: fadeUp 0.25s ease;
+}
+
+.userRow {
+  flex-direction: row-reverse;
+}
+
+.assistantRow {
+  flex-direction: row;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* 어시스턴트 아바타 */
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--gold-dim), var(--gold));
+  color: #0a0b0f;
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+/* assistant 메시지 본문 + 컨택 카드를 묶는 컨테이너 */
+.msgBody {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 82%;
+  min-width: 0;
+}
+
+/* 말풍선 */
+.bubble {
+  max-width: 100%;
+  padding: 12px 16px;
+  border-radius: 18px;
+  font-size: 14px;
+  line-height: 1.65;
+  word-break: keep-all;       /* 한국어 단어 자르지 않음 (공백 기준 줄바꿈) */
+  overflow-wrap: anywhere;    /* 공백 없는 긴 텍스트 보호장치 — 박스 밖 삐져나감 방지 */
+}
+
+/* 학과 컨택 카드 — 답변 아래 별도 표시 */
+.contactCard {
+  background: rgba(201, 162, 126, 0.08);
+  border: 1px solid rgba(201, 162, 126, 0.35);
+  border-radius: 14px;
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.contactHead {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.contactDept {
+  color: var(--gold);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: -0.2px;
+}
+
+.contactNote {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.contactRows {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.contactRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 7px 11px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  text-decoration: none;
+  color: var(--text);
+  font-size: 12.5px;
+  transition: background 0.15s, border-color 0.15s;
+  border: 1px solid transparent;
+  gap: 12px;
+}
+
+.contactRow:hover {
+  background: rgba(201, 162, 126, 0.12);
+  border-color: rgba(201, 162, 126, 0.3);
+}
+
+.contactRow:active {
+  background: rgba(201, 162, 126, 0.18);
+}
+
+.contactLabel {
+  color: var(--muted);
+  font-size: 11px;
+  flex-shrink: 0;
+}
+
+.contactValue {
+  color: var(--text);
+  font-weight: 500;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  word-break: break-all;
+}
+
+.assistantBubble {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  border-bottom-left-radius: 6px;
+  color: var(--text);
+}
+
+.userBubble {
+  background: var(--gold);
+  color: #0a0b0f;
+  border-bottom-right-radius: 6px;
+  font-weight: 500;
+}
+
+/* 타이핑 도트 */
+.typingDots {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  padding: 2px 0;
+}
+
+.typingDots span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--muted);
+  animation: bounce 1.2s infinite;
+}
+
+.typingDots span:nth-child(2) { animation-delay: 0.2s; }
+.typingDots span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes bounce {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+  30%            { transform: translateY(-5px); opacity: 1; }
+}
+
+/* 입력창 */
+.inputArea {
+  padding: 16px 20px 8px;
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.textarea {
+  flex: 1;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 12px 16px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.5;
+  resize: none;
+  min-height: 46px;
+  max-height: 120px;
+  transition: border-color 0.2s;
+  outline: none;
+}
+
+.textarea::placeholder {
+  color: var(--muted);
+}
+
+.textarea:focus {
+  border-color: rgba(201,162,126,0.4);
+  background: rgba(255,255,255,0.06);
+}
+
+.textarea:disabled {
+  opacity: 0.5;
+}
+
+/* 전송 버튼 */
+.sendBtn {
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  background: var(--gold);
+  color: #0a0b0f;
+  border: none;
+  font-size: 20px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.sendBtn:hover:not(:disabled) {
+  background: #d4af8e;
+  transform: scale(1.05);
+}
+
+.sendBtn:disabled {
+  background: rgba(255,255,255,0.06);
+  color: var(--muted);
+  cursor: default;
+}
+
+/* 스피너 */
+.spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255,255,255,0.2);
+  border-top-color: var(--muted);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* 힌트 */
+.hint {
+  text-align: center;
+  font-size: 11px;
+  color: var(--muted);
+  padding: 6px 0 14px;
+  flex-shrink: 0;
+}
+
+/* ════════════════════════════════════════════════
+   📱 모바일 (≤768px)
+   - 가로 100% / 세로 60% (avatar 40%)
+   - border-left → border-top
+   - 패딩·폰트 축소
+   - 입력창 가독 유지하면서 컴팩트
+   - safe-area 보정 (iOS 홈인디케이터)
+   ════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .panel {
+    width: 100%;
+    height: 58%;
+    flex: 1;                       /* 남은 공간 다 사용 */
+    min-height: 0;
+    border-left: none;
+  }
+
+  .header {
+    padding: 12px 16px;
+  }
+
+  .headerTitle {
+    font-size: 13px;
+  }
+
+  .headerSub {
+    font-size: 10px;
+    padding: 2px 8px;
+  }
+
+  .userArea {
+    justify-content: flex-end;
+    gap: 6px;
+  }
+
+  .msgBody {
+    max-width: 88%;
+  }
+
+  .contactCard {
+    padding: 9px 12px;
+  }
+
+  .contactRow {
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+
+  .contactValue {
+    font-size: 12px;
+  }
+
+  .userGreeting {
+    max-width: 46vw;
+    overflow: visible;
+    text-align: right;
+    text-overflow: clip;
+    white-space: normal;
+    line-height: 1.3;
+  }
+
+  .logoutBtn {
+    padding: 4px 8px;
+    font-size: 11px;
+  }
+
+  .loginBtn {
+    padding: 5px 12px;
+    font-size: 12px;
+  }
+
+  .surveyBtn {
+    padding: 4px 9px;
+    font-size: 11px;
+  }
+
+  .messages {
+    padding: 14px 12px;
+    gap: 12px;
+  }
+
+  .avatar {
+    width: 28px;
+    height: 28px;
+    font-size: 11px;
+  }
+
+  .bubble {
+    font-size: 13px;
+    padding: 10px 14px;
+    max-width: 88%;
+    border-radius: 14px;
+  }
+
+  .inputArea {
+    padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
+    gap: 6px;
+  }
+
+  .textarea {
+    padding: 10px 12px;
+    min-height: 42px;
+    border-radius: 12px;
+    font-size: 14px;             /* iOS는 16px 미만이면 zoom-in 발생 → 그래도 14px 유지 */
+  }
+
+  .sendBtn {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    font-size: 18px;
+  }
+
+  .hint {
+    font-size: 10px;
+    padding: 4px 0 calc(8px + env(safe-area-inset-bottom));
+  }
+}
+
+@media (max-width: 380px) {
+  .userGreeting {
+    max-width: 40vw;
+  }
+}

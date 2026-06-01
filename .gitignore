@@ -1,0 +1,152 @@
+# ─────────────────────────────────────────────
+# 보안 — 시크릿 절대 커밋 금지
+# ─────────────────────────────────────────────
+# 환경변수
+.env
+.env.*
+.env.local
+.env.development
+.env.production
+.env.staging
+*.env
+# ↓ .env.example 은 템플릿이므로 커밋해야 함 (시크릿 미포함)
+!.env.example
+
+# API 키·토큰·자격증명
+**/secrets/
+**/credentials/
+*credentials*.json
+*service-account*.json
+*.pem
+*.key
+*.cer
+*.crt
+*.p12
+*.pfx
+
+# LiveAvatar / HeyGen 관련 토큰·세션 파일
+*livekit-token*
+*heygen-token*
+*api-key*
+
+# ─────────────────────────────────────────────
+# 빌드 산출물
+# ─────────────────────────────────────────────
+dist/
+build/
+out/
+.vercel/
+.next/
+.cache/
+.parcel-cache/
+
+# ─────────────────────────────────────────────
+# 의존성
+# ─────────────────────────────────────────────
+node_modules/
+.pnp/
+.pnp.js
+.pnp.cjs
+jspm_packages/
+
+# ─────────────────────────────────────────────
+# 로그·임시 파일
+# ─────────────────────────────────────────────
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+.npm
+.yarn-integrity
+
+# 디버그·테스트 임시
+**/test_*.json
+**/test_*.txt
+**/debug_*.js
+**/debug_*.json
+**/scratch_*
+
+# ─────────────────────────────────────────────
+# 운영 비밀 (서버 설정)
+# ─────────────────────────────────────────────
+**/.htaccess
+**/.htaccess.example
+**/.htpasswd
+**/nginx.conf.local
+**/.env.deploy
+
+# ─────────────────────────────────────────────
+# 사적 문서·논문 작업물
+# ─────────────────────────────────────────────
+docs/paper-private/
+docs/paper-storyline-*.md
+docs/paper-draft-*.md
+docs/paper-references-*.md
+docs/paper-abstract-*.md
+docs/GUIDE.md
+docs/DEVLOG.md
+docs/INTERNAL*.md
+
+# Claude Code 작업 지침 (로컬에만 유지, GitHub 노출 X)
+CLAUDE.md
+.claude/
+
+# ─────────────────────────────────────────────
+# IDE / OS
+# ─────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ─────────────────────────────────────────────
+# Python (RAG 인덱스 빌드 등 보조 스크립트)
+# ─────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+.pytest_cache/
+*.egg-info/
+
+# ─────────────────────────────────────────────
+# 데이터·모델 (대용량·민감)
+# ─────────────────────────────────────────────
+*.sqlite
+*.sqlite3
+*.db
+data/raw/
+data/private/
+models/
+*.bin
+*.gguf
+*.safetensors
+
+# RAG 코퍼스 (학내 데이터)
+rag/corpus_private/
+rag/index_private/
+
+# ─────────────────────────────────────────────
+# 백업·압축
+# ─────────────────────────────────────────────
+*.bak
+*.backup
+*.old
+*.zip
+*.tar.gz
+*.tgz
+.vercel
+
+# ─────────────────────────────────────────────
+# 내부 개발 문서 — push 금지
+# ─────────────────────────────────────────────
+docs/INTERNAL_*.md
+docs/_*
