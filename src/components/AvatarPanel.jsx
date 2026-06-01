@@ -5,10 +5,10 @@ import Image2DAvatar from './Image2DAvatar'
 import Live2DAvatar from './Live2DAvatar'
 
 // 아바타 종류 — Vercel 환경변수 VITE_AVATAR_KIND 로 선택(코드 수정 0곳).
-//   'live2d' (기본) : Live2D — 부드럽게 말하는 2D 아바타 (리깅된 model3.json 필요)
-//   '2d'            : PNG 이미지 2D 아바타 (그림 몇 장, 리깅 불필요)
+//   '2d' (기본)     : PNG 이미지 2D 아바타 (그림 몇 장, 리깅 불필요) — 바로 동작
+//   'live2d'        : Live2D — 부드럽게 말하는 2D 아바타 (리깅된 model3.json 필요, 업그레이드용)
 //   'vrm'           : VRoid VRM 3D 아바타 (사람형)
-const AVATAR_KIND = (import.meta.env.VITE_AVATAR_KIND || 'live2d').toLowerCase()
+const AVATAR_KIND = (import.meta.env.VITE_AVATAR_KIND || '2d').toLowerCase()
 const IS_LIVE2D = AVATAR_KIND === 'live2d'
 const IS_2D = AVATAR_KIND === '2d'
 

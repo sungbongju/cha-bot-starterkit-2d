@@ -128,11 +128,11 @@ https://middleton.p-e.kr/finbot/team/[본인팀번호]/rag
 
 | 모드 | env | 특징 | 준비물 |
 |---|---|---|---|
-| **Live2D** (기본) | `live2d` | **부드럽게 말하고 눈 깜빡임** (VTuber 방식) | Cubism 으로 리깅한 `model3.json` 세트 |
-| PNG 2D | `2d` | 가장 간단, 입 2프레임 | 캐릭터 PNG 몇 장 |
+| **PNG 2D** (기본) | `2d` | 가장 간단, 바로 동작 | 캐릭터 PNG 몇 장 |
+| Live2D | `live2d` | **부드럽게 말하고 눈 깜빡임** (VTuber 방식, 업그레이드) | Cubism 으로 리깅한 `model3.json` 세트 |
 | VRoid 3D | `vrm` | 사람형 3D | `avatar.vrm` |
 
-#### 🎭 Live2D (기본) — 부드럽게 말하는 2D
+#### 🎭 Live2D — 부드럽게 말하는 2D (업그레이드)
 
 1. **Live2D Cubism Editor**(무료)로 캐릭터를 리깅 → runtime 파일 추출
    (`.moc3`, `.model3.json`, 텍스처, 모션/표정). 입 파라미터 `ParamMouthOpenY` 포함.
