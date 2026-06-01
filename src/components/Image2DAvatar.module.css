@@ -1,31 +1,24 @@
 /* Image2DAvatar — 2D 이미지 아바타 무대.
-   투명 배경이라 AvatarPanel 의 패널 배경/글로우가 그대로 비친다. */
+   idle/talk/wink 세 레이어를 같은 자리에 겹쳐 두고 opacity 로 크로스페이드한다.
+   투명 배경이라 패널 배경/글로우가 그대로 비친다. */
 
 .stage {
   position: relative;
   width: 100%;
   height: 100%;
   display: flex;
-  align-items: flex-end;     /* 캐릭터를 바닥에 세움 */
+  align-items: flex-end;
   justify-content: center;
   overflow: hidden;
   cursor: pointer;
-  --a2d-talk: 0;             /* speak() 가 음량(0..1)으로 갱신 */
+  --a2d-talk: 0;            /* speak() 가 음량(0..1)으로 갱신 → 베이스 squash */
 }
 
-.avatarImg {
-  max-width: 92%;
-  max-height: 98%;
-  object-fit: contain;
-  user-select: none;
-  -webkit-user-drag: none;
-  transform-origin: 50% 100%; /* 발밑 기준으로 살짝 흔들림 */
-  will-change: transform;
-  filter: drop-shadow(0 12px 18px rgba(0, 0, 0, 0.18));
-}
-
-/* idle: 부드러운 상하 호흡/부유 */
-.floating {
+/* idle 상하 호흡/부유 — 말할 때도 유지(레이어 전체가 같이 움직여 정렬 유지) */
+.floatWrap {
+  position: relative;
+  width: 100%;
+  height: 100%;
   animation: a2dFloat 3.6s ease-in-out infinite;
 }
 
@@ -35,21 +28,49 @@
   50%  { transform: translateY(-2.2%) rotate(-0.4deg); }
 }
 
-/* talking: talk 프레임이 없을 때도 말하는 느낌이 나도록 음량 기반 수직 squash.
-   --a2d-talk 가 클수록 살짝 눌렸다 펴진다(입 벌리는 듯한 바운스). */
-.talking {
-  animation: a2dBob 0.5s ease-in-out infinite;
-  transform: scaleY(calc(1 + var(--a2d-talk) * 0.05))
-             scaleX(calc(1 - var(--a2d-talk) * 0.02));
+/* 세 레이어를 같은 박스에 겹침. object-fit:contain 으로 캐릭터가 같은 자리에 정렬된다. */
+.layer {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
 }
 
-@keyframes a2dBob {
-  0%,
-  100% { translate: 0 0; }
-  50%  { translate: 0 -1.5%; }
+.avatarImg {
+  max-width: 92%;
+  max-height: 98%;
+  object-fit: contain;
+  user-select: none;
+  -webkit-user-drag: none;
+  transform-origin: 50% 100%;
+  filter: drop-shadow(0 12px 18px rgba(0, 0, 0, 0.18));
+}
+
+/* 베이스(idle): 음량 기반 미세 수직 squash(폴백/생동감) */
+.base .avatarImg {
+  transform: scaleY(calc(1 + var(--a2d-talk) * 0.045))
+             scaleX(calc(1 - var(--a2d-talk) * 0.02));
+  will-change: transform;
+}
+
+/* talk 오버레이: opacity 는 JS(rAF)가 직접 제어 → 부드러운 크로스페이드 */
+.talk {
+  opacity: 0;
+  will-change: opacity;
+}
+
+/* wink 오버레이: 클릭 시 짧게 페이드 */
+.wink {
+  opacity: 0;
+  transition: opacity 140ms ease;
+  z-index: 2;
+}
+.winkOn {
+  opacity: 1;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .floating,
-  .talking { animation: none; }
+  .floatWrap { animation: none; }
+  .base .avatarImg { transform: none; }
 }
