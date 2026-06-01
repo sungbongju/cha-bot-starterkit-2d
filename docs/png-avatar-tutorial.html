@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>PNG 아바타 만들기 자습서</title>
+<style>
+  body { font-family: 'Malgun Gothic','맑은 고딕',sans-serif; color:#1a2330; font-size:12pt; line-height:1.7; margin:28px 40px; }
+  h1 { color:#0a1e3f; font-size:26pt; margin:0 0 4px; }
+  h2 { color:#0a1e3f; font-size:17pt; border-bottom:3px solid #d4a574; padding-bottom:5px; margin:26px 0 12px; }
+  h3 { color:#10325f; font-size:13.5pt; margin:18px 0 6px; }
+  p { margin:7px 0; }
+  code { background:#f3eee4; color:#7a5a2a; padding:1px 6px; font-family:Consolas,monospace; font-size:11pt; }
+  pre { background:#0a1e3f; color:#f5e9d4; padding:12px 16px; font-family:Consolas,monospace; font-size:11pt; line-height:1.5; white-space:pre-wrap; }
+  pre code { background:none; color:inherit; padding:0; }
+  table { border-collapse:collapse; width:100%; margin:10px 0; font-size:11pt; }
+  th,td { border:1px solid #d8cdb8; padding:8px 10px; text-align:left; vertical-align:top; }
+  th { background:#0a1e3f; color:#fff; }
+  .tag { display:inline-block; background:#d4a574; color:#fff; font-size:10pt; padding:2px 10px; border-radius:3px; }
+  .lead { color:#5b4a30; font-size:13pt; }
+  .box { border:1px solid #d8cdb8; background:#faf7f0; padding:12px 16px; margin:12px 0; }
+  .warn { border-left:5px solid #c0392b; background:#fcf0ee; padding:10px 16px; margin:12px 0; }
+  .ok   { border-left:5px solid #2e7d46; background:#eef7f0; padding:10px 16px; margin:12px 0; }
+  .tip  { border-left:5px solid #d4a574; background:#fbf6ec; padding:10px 16px; margin:12px 0; }
+  .step { color:#d4a574; font-weight:bold; }
+  .imgrow td { text-align:center; border:1px solid #e7dcc6; }
+  .imgrow img { height:150px; }
+  .cap { color:#6b7280; font-size:10.5pt; }
+  .pb { page-break-before: always; }
+  ul,ol { margin:6px 0 6px 4px; padding-left:22px; }
+  li { margin:4px 0; }
+  .small { font-size:10.5pt; color:#6b7280; }
+</style>
+</head>
+<body>
+
+<h1>🎭 PNG 아바타 만들기</h1>
+<p class="lead">내 캐릭터 그림 몇 장으로, 말하는 AI 아바타 만들기 — <b>코딩 0, 5분</b></p>
+<p class="small">cha-bot-starterkit-2d · 비즈모델 경진대회 봇 제작용 · 데이터경영학과</p>
+
+<div class="box">
+  <b>이 자습서를 끝내면</b> — 내 봇이 대화할 때 <b>캐릭터가 입을 움직이며 말하고</b>, 평소엔 둥둥 떠다니고, 클릭하면 윙크합니다.
+  3D 모델링도, 어려운 작업(리깅)도, 코드 수정도 <b>전혀 필요 없습니다.</b> 캐릭터 그림만 있으면 돼요.
+</div>
+
+<table class="imgrow">
+  <tr>
+    <td><img src="../public/avatar2d/idle.png" alt="idle"></td>
+    <td><img src="../public/avatar2d/talk.png" alt="talk"></td>
+    <td><img src="../public/avatar2d/wink.png" alt="wink"></td>
+  </tr>
+  <tr class="cap">
+    <td>idle.png<br>(기본 표정)</td>
+    <td>talk.png<br>(말할 때)</td>
+    <td>wink.png<br>(클릭 시)</td>
+  </tr>
+</table>
+<p class="cap" style="text-align:center">▲ 그릭봇 예시 — 이렇게 3장이면 충분합니다 (1장만 넣어도 동작)</p>
+
+<h2>왜 PNG 방식인가?</h2>
+<p>아바타를 만드는 방법은 3가지가 있는데, PNG가 가장 쉽습니다.</p>
+<table>
+  <tr><th>방식</th><th>난이도</th><th>필요한 것</th><th>비고</th></tr>
+  <tr><td><b>PNG 이미지</b> ⭐</td><td>가장 쉬움 (5분)</td><td>캐릭터 그림 1~3장</td><td>로봇·동물·일러스트 <b>무엇이든</b> 가능</td></tr>
+  <tr><td>VRoid (3D)</td><td>보통</td><td>VRoid Studio로 캐릭터 제작</td><td><b>사람형만</b> 가능</td></tr>
+  <tr><td>Live2D</td><td>어려움 (반나절~1일)</td><td>Cubism 리깅 작업</td><td>가장 부드럽지만 전문 작업</td></tr>
+</table>
+<div class="tip">💡 로봇·동물·캐릭터 마스코트(예: 그릭봇)는 VRoid로 못 만들기 때문에, <b>PNG 방식이 정답</b>입니다.</div>
+
+<h2>준비물 체크리스트</h2>
+<ul>
+  <li>☐ 내 봇 프로젝트 폴더 (cha-bot-starterkit-2d 를 클론한 폴더)</li>
+  <li>☐ 캐릭터 그림 — <b>배경이 투명한 PNG</b> 1~3장 (만드는 법은 STEP 1에)</li>
+  <li>☐ GitHub 계정 + 내 봇 레포 (이미 봇 만들 때 만든 것)</li>
+</ul>
+
+<div class="pb"></div>
+<h2><span class="step">STEP 1.</span> 캐릭터 그림 준비</h2>
+
+<h3>1-1. 어떤 그림이 필요한가</h3>
+<p>최대 3장이지만, <b>idle.png 한 장만 있어도 동작</b>합니다. 더 생생하게 하려면 3장을 준비하세요.</p>
+<table>
+  <tr><th>파일명</th><th>언제 보이나</th><th>예시(그릭봇)</th></tr>
+  <tr><td><code>idle.png</code> <b>(필수)</b></td><td>평소 / 대기 중</td><td>호기심(눈 동그란) 표정</td></tr>
+  <tr><td><code>talk.png</code> (선택)</td><td>봇이 말하는 동안</td><td>웃는 표정</td></tr>
+  <tr><td><code>wink.png</code> (선택)</td><td>캐릭터를 클릭했을 때</td><td>윙크 표정</td></tr>
+</table>
+<div class="tip">💡 talk.png 가 없으면, 말할 때 idle 그림이 살짝 통통 튀는 것으로 대신합니다. 그래도 충분히 자연스러워요.</div>
+
+<h3>1-2. 그림이 아직 없다면</h3>
+<p>직접 그리거나, AI 이미지 생성(예: ChatGPT 이미지, Gemini 등)에게 캐릭터를 그려달라고 해서 받으세요.
+표정만 살짝 다른 그림 2~3장을 받으면 idle/talk/wink 로 쓸 수 있습니다.</p>
+<div class="tip">💡 표정을 따로 받기 어려우면, <b>한 장(idle.png)만으로 시작</b>해도 됩니다. 나중에 talk/wink 를 추가하면 돼요.</div>
+
+<h3>1-3. 배경을 투명하게 만들기</h3>
+<p>그림 배경이 흰색/색깔이면 봇 화면에 <b>네모난 배경</b>이 같이 보입니다. 배경을 투명하게 지워야 깔끔합니다.</p>
+<ol>
+  <li><b>remove.bg</b> 접속 → <a href="https://www.remove.bg/">https://www.remove.bg/</a> (무료)</li>
+  <li>내 캐릭터 그림 업로드</li>
+  <li>배경이 자동으로 지워짐 → <b>Download</b> 클릭 (투명 PNG로 저장됨)</li>
+</ol>
+<div class="ok">✅ 저장된 파일을 그림판/뷰어로 열었을 때 배경이 <b>체크무늬</b>로 보이면 = 투명 처리 성공.</div>
+
+<h3>1-4. 3장의 크기·위치 맞추기 (중요)</h3>
+<p>idle / talk / wink 는 봇이 같은 자리에서 <b>겹쳐서 바뀌기</b> 때문에, 캐릭터의 <b>크기와 위치가 같아야</b> 표정이 바뀔 때 흔들리지 않습니다.</p>
+<ul>
+  <li>가능하면 <b>같은 원본에서 표정만 바꾼 그림</b>을 쓰세요 (몸·위치 동일).</li>
+  <li>이미지 크기는 세로 <b>600px 이상</b>이면 선명합니다.</li>
+</ul>
+
+<h3>1-5. 파일 이름 규칙 (실수 1순위!)</h3>
+<div class="warn">
+  <b>⚠️ 파일명을 정확히</b> — 모두 <b>소문자</b>, 확장자 <code>.png</code>:<br>
+  <code>idle.png</code> &nbsp; <code>talk.png</code> &nbsp; <code>wink.png</code><br>
+  <span class="small">한글 이름(예: 호기심.png), 대문자(IDLE.PNG), 띄어쓰기 → <b>인식 안 됩니다.</b></span>
+</div>
+
+<div class="pb"></div>
+<h2><span class="step">STEP 2.</span> 그림을 폴더에 넣기</h2>
+
+<h3>2-1. 넣을 위치</h3>
+<p>내 봇 프로젝트 폴더 안의 <code>public/avatar2d/</code> 폴더에 넣습니다.</p>
+<pre><code>my-bot/
+  └─ public/
+       └─ avatar2d/        ← 여기에 그림을 넣으세요
+            ├─ idle.png
+            ├─ talk.png     (선택)
+            └─ wink.png     (선택)</code></pre>
+<p class="small">avatar2d 폴더가 없으면 새로 만들면 됩니다 (이름 정확히 <code>avatar2d</code>).</p>
+
+<h3>2-2. 넣는 방법</h3>
+<p>윈도우 탐색기에서 <code>my-bot\public\avatar2d\</code> 폴더를 열고, 준비한 PNG 파일들을 <b>드래그해서 복사</b>하면 됩니다.</p>
+
+<div class="pb"></div>
+<h2><span class="step">STEP 3.</span> 깃허브에 올리기</h2>
+
+<h3>3-1. 명령어 (cmd / 터미널)</h3>
+<p>봇 프로젝트 폴더(my-bot)에서 아래 3줄을 입력하세요.</p>
+<pre><code>git add public/avatar2d
+git commit -m "Add my avatar"
+git push</code></pre>
+<table>
+  <tr><th>명령</th><th>뜻</th></tr>
+  <tr><td><code>git add</code></td><td>새로 넣은 그림을 "올릴 목록"에 추가</td></tr>
+  <tr><td><code>git commit</code></td><td>변경 사항을 기록(저장점 만들기)</td></tr>
+  <tr><td><code>git push</code></td><td>내 GitHub 레포로 전송 → <b>Vercel이 자동으로 다시 배포</b></td></tr>
+</table>
+
+<h3>3-2. (대안) 명령어가 어렵다면</h3>
+<p>GitHub 웹사이트에서 내 레포 → <code>public/avatar2d</code> 폴더 → <b>Add file → Upload files</b> 로 그림을 드래그 업로드해도 됩니다. (Commit changes 클릭)</p>
+
+<div class="pb"></div>
+<h2><span class="step">STEP 4.</span> 결과 확인</h2>
+<ol>
+  <li>push(또는 업로드) 후 <b>1~2분</b> 기다리면 Vercel이 자동 재배포합니다.</li>
+  <li>내 봇 주소를 열고 <b>"대화 시작"</b></li>
+  <li>확인 포인트:
+    <ul>
+      <li>봇이 말할 때 → 캐릭터 <b>입(표정)이 움직임</b></li>
+      <li>평소 → <b>둥둥</b> 떠다님</li>
+      <li>캐릭터 <b>클릭</b> → 윙크 ✨</li>
+    </ul>
+  </li>
+</ol>
+<div class="tip">💡 이 레포(cha-bot-starterkit-2d)는 <b>PNG 모드가 기본값</b>이라 아바타 설정을 따로 안 해도 됩니다. 단, <b>채팅</b>이 되려면 Vercel 환경변수에 <b>본인 팀 번호</b> <code>TEAM_ID</code> 가 들어가 있어야 해요 (봇 만들 때 이미 설정한 값).</div>
+
+<h2>동작 원리 (궁금한 사람만)</h2>
+<p>봇이 말할 때 나오는 <b>음성의 크기(볼륨)를 실시간으로 분석</b>해서 — 소리가 크면 <code>talk</code> 표정, 작으면 <code>idle</code> 표정으로 부드럽게 바꾸고, 볼륨에 맞춰 살짝 통통 튀게 합니다. 모든 처리가 <b>브라우저 안에서</b> 일어나므로 추가 비용이 <b>0원</b>입니다.</p>
+<p class="small">이 복잡한 음성·애니메이션 코드는 스타터킷에 이미 다 들어 있습니다. 그래서 여러분은 <b>그림만</b> 넣으면 됩니다.</p>
+
+<h2>잘 안 될 때 (트러블슈팅)</h2>
+<table>
+  <tr><th>증상</th><th>원인 / 해결</th></tr>
+  <tr><td>아바타 자리에 "비어있어요" 안내가 뜸</td><td>파일명·위치 확인. <code>public/avatar2d/idle.png</code> 가 <b>소문자·정확한 이름</b>인지.</td></tr>
+  <tr><td>캐릭터 뒤에 흰색/색깔 네모가 보임</td><td>배경을 안 지움 → remove.bg 로 <b>투명 PNG</b>로 다시 저장.</td></tr>
+  <tr><td>말할 때 표정이 흔들리거나 어긋남</td><td>idle/talk/wink 의 <b>크기·위치가 다름</b> → 같은 크기·위치로 맞추기.</td></tr>
+  <tr><td>아바타는 뜨는데 채팅이 안 됨</td><td>Vercel 환경변수 <code>TEAM_ID</code>(본인 팀 번호) 확인.</td></tr>
+  <tr><td>그림을 바꿨는데 안 바뀜</td><td>push 했는지 + 1~2분 기다렸는지 확인. 브라우저 <b>새로고침(Ctrl+F5)</b>.</td></tr>
+</table>
+
+<h2>정리</h2>
+<div class="ok">
+  <b>① 그림 준비</b>(투명 PNG, 이름 idle/talk/wink) →
+  <b>② <code>public/avatar2d/</code> 에 넣기</b> →
+  <b>③ git add · commit · push</b> →
+  <b>④ 1~2분 뒤 봇에서 확인.</b> 끝!
+</div>
+<p class="small" style="margin-top:14px">막히면 cmd 화면을 캡처해서 문의하세요. 화이팅입니다 💪</p>
+
+</body>
+</html>
