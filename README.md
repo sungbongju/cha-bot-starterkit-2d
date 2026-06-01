@@ -128,9 +128,14 @@ https://middleton.p-e.kr/finbot/team/[본인팀번호]/rag
 
 | 모드 | env | 특징 | 준비물 |
 |---|---|---|---|
-| **PNG 2D** (기본) | `2d` | 가장 간단, 바로 동작 | 캐릭터 PNG 몇 장 |
-| Live2D | `live2d` | **부드럽게 말하고 눈 깜빡임** (VTuber 방식, 업그레이드) | Cubism 으로 리깅한 `model3.json` 세트 |
+| **얼굴-스크린** (기본) | `face` | 검은 얼굴 스크린에 **입을 코드로 그려** 음량 따라 부드럽게 말함 (평면-얼굴 로봇/마스코트) | 캐릭터 PNG 1장(`idle.png`) |
+| PNG 2D | `2d` | 사진 2프레임 교체(idle/talk/wink) | 캐릭터 PNG 몇 장 |
+| Live2D | `live2d` | 부드럽게 말하고 눈 깜빡임 (VTuber 방식, 최고 품질) | Cubism 으로 리깅한 `model3.json` 세트 |
 | VRoid 3D | `vrm` | 사람형 3D | `avatar.vrm` |
+
+> **얼굴-스크린(face)** 은 그릭 같은 "검은 화면 얼굴" 로봇용. `public/avatar2d/idle.png` 한 장만 있으면
+> 입을 코드로 그려 음량에 따라 진짜 벌렸다 닫혀요(사진 교체가 아니라 분신·깜빡임 없음).
+> 입 위치는 `RobotFace2DAvatar.jsx` 의 `DEF`(cx/cy/halfW…)로 캐릭터에 맞게 조정.
 
 #### 🎭 Live2D — 부드럽게 말하는 2D (업그레이드)
 

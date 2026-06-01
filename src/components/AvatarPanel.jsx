@@ -3,12 +3,15 @@ import styles from './AvatarPanel.module.css'
 import VRMAvatar from './VRMAvatar'
 import Image2DAvatar from './Image2DAvatar'
 import Live2DAvatar from './Live2DAvatar'
+import RobotFace2DAvatar from './RobotFace2DAvatar'
 
 // 아바타 종류 — Vercel 환경변수 VITE_AVATAR_KIND 로 선택(코드 수정 0곳).
-//   '2d' (기본)     : PNG 이미지 2D 아바타 (그림 몇 장, 리깅 불필요) — 바로 동작
-//   'live2d'        : Live2D — 부드럽게 말하는 2D 아바타 (리깅된 model3.json 필요, 업그레이드용)
+//   'face' (기본)   : 얼굴 스크린에 입을 코드로 그려 음량 따라 부드럽게 말함 (그릭 등 평면-얼굴 로봇)
+//   '2d'            : PNG 이미지 2프레임 교체 아바타 (idle/talk/wink)
+//   'live2d'        : Live2D — 리깅된 model3.json 필요 (최고 품질 업그레이드)
 //   'vrm'           : VRoid VRM 3D 아바타 (사람형)
-const AVATAR_KIND = (import.meta.env.VITE_AVATAR_KIND || '2d').toLowerCase()
+const AVATAR_KIND = (import.meta.env.VITE_AVATAR_KIND || 'face').toLowerCase()
+const IS_FACE = AVATAR_KIND === 'face'
 const IS_LIVE2D = AVATAR_KIND === 'live2d'
 const IS_2D = AVATAR_KIND === '2d'
 
@@ -66,7 +69,14 @@ export default function AvatarPanel({
           className={styles.videoWrap}
           style={showAvatarVideo ? undefined : { display: 'none' }}
         >
-          {IS_LIVE2D ? (
+          {IS_FACE ? (
+            <RobotFace2DAvatar
+              ref={vrmAvatarRef}
+              onReady={() => { setAvatarError(false); onAvatarReady?.() }}
+              onError={() => setAvatarError(true)}
+              style={{ opacity: videoReady ? 1 : 0, transition: 'opacity .35s ease' }}
+            />
+          ) : IS_LIVE2D ? (
             <Live2DAvatar
               ref={vrmAvatarRef}
               onReady={() => { setAvatarError(false); onAvatarReady?.() }}
@@ -136,7 +146,7 @@ export default function AvatarPanel({
             <div className={styles.nameplate}>
               <div className={styles.nameplateInner}>
                 <span className={styles.nameplateName}>내 AI 아바타</span>
-                <span className={styles.nameplateSub}>{IS_LIVE2D ? 'Live2D' : IS_2D ? '2D 이미지 아바타' : 'VRM + three-vrm'}</span>
+                <span className={styles.nameplateSub}>{IS_FACE ? '2D 아바타' : IS_LIVE2D ? 'Live2D' : IS_2D ? '2D 이미지 아바타' : 'VRM + three-vrm'}</span>
               </div>
             </div>
           )}
