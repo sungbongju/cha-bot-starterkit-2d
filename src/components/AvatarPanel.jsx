@@ -2,11 +2,14 @@ import { useState } from 'react'
 import styles from './AvatarPanel.module.css'
 import VRMAvatar from './VRMAvatar'
 import Image2DAvatar from './Image2DAvatar'
+import Live2DAvatar from './Live2DAvatar'
 
-// 아바타 종류 — 이 레포(2D Edition)는 PNG 이미지 2D 아바타가 기본값이다.
-//   '2d' (기본)  : PNG 이미지 2D 아바타 (로봇·동물·일러스트 등 비인간 마스코트)
-//   'vrm'        : VRoid VRM 3D 아바타 (사람형) — Vercel env VITE_AVATAR_KIND=vrm 로 전환
-const AVATAR_KIND = (import.meta.env.VITE_AVATAR_KIND || '2d').toLowerCase()
+// 아바타 종류 — Vercel 환경변수 VITE_AVATAR_KIND 로 선택(코드 수정 0곳).
+//   'live2d' (기본) : Live2D — 부드럽게 말하는 2D 아바타 (리깅된 model3.json 필요)
+//   '2d'            : PNG 이미지 2D 아바타 (그림 몇 장, 리깅 불필요)
+//   'vrm'           : VRoid VRM 3D 아바타 (사람형)
+const AVATAR_KIND = (import.meta.env.VITE_AVATAR_KIND || 'live2d').toLowerCase()
+const IS_LIVE2D = AVATAR_KIND === 'live2d'
 const IS_2D = AVATAR_KIND === '2d'
 
 const STATUS_MAP = {
@@ -63,7 +66,14 @@ export default function AvatarPanel({
           className={styles.videoWrap}
           style={showAvatarVideo ? undefined : { display: 'none' }}
         >
-          {IS_2D ? (
+          {IS_LIVE2D ? (
+            <Live2DAvatar
+              ref={vrmAvatarRef}
+              onReady={() => { setAvatarError(false); onAvatarReady?.() }}
+              onError={() => setAvatarError(true)}
+              style={{ opacity: videoReady ? 1 : 0, transition: 'opacity .35s ease' }}
+            />
+          ) : IS_2D ? (
             <Image2DAvatar
               ref={vrmAvatarRef}
               onReady={() => { setAvatarError(false); onAvatarReady?.() }}
@@ -86,9 +96,11 @@ export default function AvatarPanel({
               <div className={styles.loadingSpinner} />
               <p className={styles.placeholderText}>아바타 불러오는 중…</p>
               <p className={styles.placeholderSub}>
-                {IS_2D
-                  ? '이미지를 불러오고 있어요.'
-                  : 'VRM 파일이 커서 첫 로드는 몇 초 걸릴 수 있어요.'}
+                {IS_LIVE2D
+                  ? 'Live2D 모델을 불러오고 있어요.'
+                  : IS_2D
+                    ? '이미지를 불러오고 있어요.'
+                    : 'VRM 파일이 커서 첫 로드는 몇 초 걸릴 수 있어요.'}
               </p>
             </div>
           )}
@@ -97,10 +109,16 @@ export default function AvatarPanel({
           {!videoReady && avatarError && (
             <div className={styles.placeholder}>
               <div className={styles.avatarIcon}>
-                <span>{IS_2D ? '2D' : 'VRM'}</span>
+                <span>{IS_LIVE2D ? 'L2D' : IS_2D ? '2D' : 'VRM'}</span>
               </div>
               <p className={styles.placeholderText}>👋 아바타가 비어있어요</p>
-              {IS_2D ? (
+              {IS_LIVE2D ? (
+                <p className={styles.placeholderSub}>
+                  <code>public/avatar2d_live2d/model.model3.json</code> (+ moc3·텍스처) 를 넣으면
+                  여기에 캐릭터가 나타납니다.<br/>
+                  Live2D Cubism 으로 리깅한 모델이 필요해요. 자세한 안내는 <code>HOWTO.txt</code>.
+                </p>
+              ) : IS_2D ? (
                 <p className={styles.placeholderSub}>
                   <code>public/avatar2d/idle.png</code> 파일을 추가하면 여기에 캐릭터가 나타납니다.<br/>
                   (선택) <code>talk.png</code>·<code>wink.png</code> 도 넣으면 입 모양·윙크가 살아나요.
@@ -118,7 +136,7 @@ export default function AvatarPanel({
             <div className={styles.nameplate}>
               <div className={styles.nameplateInner}>
                 <span className={styles.nameplateName}>내 AI 아바타</span>
-                <span className={styles.nameplateSub}>{IS_2D ? '2D 이미지 아바타' : 'VRM + three-vrm'}</span>
+                <span className={styles.nameplateSub}>{IS_LIVE2D ? 'Live2D' : IS_2D ? '2D 이미지 아바타' : 'VRM + three-vrm'}</span>
               </div>
             </div>
           )}

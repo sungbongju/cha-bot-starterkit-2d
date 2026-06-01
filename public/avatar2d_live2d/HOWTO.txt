@@ -1,0 +1,62 @@
+Live2D 아바타 넣는 법 (부드럽게 말하는 2D)
+==========================================
+
+PNG 2장 교체보다 훨씬 자연스럽게, 입이 스르륵 움직이고 눈도 깜빡이는
+"VTuber 방식" 2D 아바타입니다. 캐릭터를 Live2D 로 한 번 리깅하면 됩니다.
+
+이 레포는 Live2D 가 "기본값" 입니다 (VITE_AVATAR_KIND 기본 = live2d).
+  - 그냥 PNG 몇 장으로 간단히 하려면  → VITE_AVATAR_KIND = 2d  (public/avatar2d/)
+  - 사람형 3D(VRoid)로 하려면         → VITE_AVATAR_KIND = vrm (public/avatar.vrm)
+
+────────────────────────────────────────
+1) 모델 만들기 (그림 작가가 한 번)
+────────────────────────────────────────
+- 무료 프로그램: Live2D Cubism Editor (FREE 버전으로 충분)
+  https://www.live2d.com/en/cubism/download/
+- 캐릭터 그림을 부위별 레이어(눈·입·눈썹·머리·몸 등)로 나눈 PSD 준비
+  → Cubism 에서 가져와 리깅 → "조직 파일 추출(Export for runtime)"
+- 추출하면 다음 파일들이 나옵니다:
+    *.moc3 , *.model3.json , *.physics3.json(선택) ,
+    텍스처 폴더(*.2048/texture_00.png ...) , motion/*.motion3.json(선택) ,
+    expressions/*.exp3.json(선택)
+
+입을 움직이려면 모델에 **ParamMouthOpenY** 파라미터가 있어야 합니다
+(Cubism 기본 템플릿에 보통 들어 있음). 이걸 봇이 음성 음량에 맞춰 자동으로 움직입니다.
+
+────────────────────────────────────────
+2) 이 폴더에 넣기
+────────────────────────────────────────
+추출한 파일 전부를 public/avatar2d_live2d/ 안에 같은 구조로 복사하고,
+대표 파일(.model3.json)의 이름을 정확히 model.model3.json 으로 바꾸세요.
+
+  public/avatar2d_live2d/
+    ├─ model.model3.json        ← 이름 이렇게 (안의 경로 참조는 그대로 둠)
+    ├─ <캐릭터>.moc3
+    ├─ <캐릭터>.2048/texture_00.png ...
+    ├─ motion/ ...   (선택)
+    └─ expressions/ ...(선택)
+
+그 다음 커밋 + 푸시 → Vercel 자동 재배포.
+
+  git add public/avatar2d_live2d
+  git commit -m "Add Live2D avatar"
+  git push
+
+────────────────────────────────────────
+3) 동작 원리 / 비용
+────────────────────────────────────────
+- 봇이 말할 때 TTS 음성을 브라우저에서 분석(음량 RMS) → 입(ParamMouthOpenY)을
+  연속적으로 움직여 부드럽게 발화합니다. 눈 깜빡임·idle 흔들림은 모델 내장 모션이 처리.
+- 전부 브라우저 안에서 렌더링 → 외부 스트리밍 비용 0원.
+- 표정(exp3.json)이 있으면 봇이 setExpression(이름) 으로 바꿀 수 있습니다.
+
+────────────────────────────────────────
+4) 빠른 시연용 데모 모델 (개발 확인용)
+────────────────────────────────────────
+리깅 전에 동작만 먼저 보고 싶다면, Live2D 공식 무료 샘플 모델(Hiyori/Haru 등)을
+받아 위 구조로 넣고 model.model3.json 으로 이름만 바꾸면 바로 보입니다.
+  https://www.live2d.com/en/learn/sample/
+※ 샘플 모델은 비상업·테스트용 무료 라이선스입니다. 실제 배포엔 본인 캐릭터를 쓰세요.
+
+라이선스: Live2D Cubism 은 소규모/비영리(학생 프로젝트)는 무료입니다.
+훗날 매출이 큰 상업 제품이 되면 Live2D Publication License 조건을 다시 확인하세요.

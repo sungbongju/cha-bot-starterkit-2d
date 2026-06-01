@@ -8,7 +8,7 @@
 
 | | |
 |---|---|
-| 🖼️ **2D 아바타** | 캐릭터 PNG 그림만 올리면 끝 (VRoid·Blender 불필요) |
+| 🎭 **2D 아바타** | **Live2D**(부드럽게 말함) 기본 · PNG 간단 모드 · VRoid 3D 모두 지원 |
 | 💬 **AI 채팅** | 미들턴 Gemma4 — **무료 공유 (학생 비용 0원)** |
 | 🗣 **음성** | STT/TTS 자동 작동 |
 | 📚 **나만의 지식** | 텍스트만 붙여넣으면 **AI가 자동으로 RAG 청크 생성** |
@@ -122,35 +122,36 @@ https://middleton.p-e.kr/finbot/team/[본인팀번호]/rag
 {"id":"q2","question":"분개가 뭐야","answer":"거래를 차변과 대변으로 나누는 거예요."}
 ```
 
-### 6️⃣ 🖼️ 2D 이미지 아바타 (이 에디션의 기본)
+### 6️⃣ 🎭 아바타 — 3가지 중 선택
 
-로봇·동물·일러스트처럼 **사람이 아닌 마스코트**를 PNG 그림만으로 동작시켜요.
-**별도 프로그램(VRoid·Blender) 불필요** — 가지고 있는 캐릭터 그림만 있으면 됩니다.
+이 에디션은 `VITE_AVATAR_KIND` 환경변수로 아바타 종류를 고릅니다 (코드 수정 0곳).
 
-1. `public/avatar2d/` 폴더에 PNG 넣기
-   - `idle.png` (필수) 기본/대기 표정
-   - `talk.png` (선택) 입 벌린 표정 — 말할 때 자동으로 바뀜
-   - `wink.png` (선택) 윙크 — 인사하거나 캐릭터를 클릭하면 잠깐 나옴
-2. 커밋 + 푸시 → Vercel 자동 재배포
+| 모드 | env | 특징 | 준비물 |
+|---|---|---|---|
+| **Live2D** (기본) | `live2d` | **부드럽게 말하고 눈 깜빡임** (VTuber 방식) | Cubism 으로 리깅한 `model3.json` 세트 |
+| PNG 2D | `2d` | 가장 간단, 입 2프레임 | 캐릭터 PNG 몇 장 |
+| VRoid 3D | `vrm` | 사람형 3D | `avatar.vrm` |
 
-```cmd
-copy "%USERPROFILE%\Desktop\idle.png" "C:\projects\my-bot\public\avatar2d\idle.png"
-cd C:\projects\my-bot
-git add public/avatar2d
-git commit -m "Add 2D avatar"
-git push
-```
+#### 🎭 Live2D (기본) — 부드럽게 말하는 2D
 
-> 봇이 말할 때 음성 음량을 실시간 분석해 입 모양(idle↔talk)이 자동으로 움직여요.
-> 모두 브라우저 안에서 처리 → 외부 비용 0원. 자세한 안내: `public/avatar2d/HOWTO.txt`
->
-> 그림 배경 지우기: [remove.bg](https://www.remove.bg/) 같은 무료 웹사이트 사용.
-> 한 변 600px 이상, idle/talk/wink 의 캐릭터 위치·크기를 똑같이 맞추면 자연스러워요.
+1. **Live2D Cubism Editor**(무료)로 캐릭터를 리깅 → runtime 파일 추출
+   (`.moc3`, `.model3.json`, 텍스처, 모션/표정). 입 파라미터 `ParamMouthOpenY` 포함.
+2. 추출 파일을 `public/avatar2d_live2d/` 에 넣고 대표 파일을 `model.model3.json` 으로 이름 변경
+3. 커밋 + 푸시 → Vercel 자동 재배포
 
-#### (대안) 사람형 3D 아바타를 쓰고 싶다면
+> 봇이 말할 때 음성 음량(RMS)을 분석해 입을 **연속적으로** 움직여요(딱딱한 교체 X).
+> 눈 깜빡임·idle 흔들림은 모델 모션이 자동 처리. 전부 브라우저 렌더 → 비용 0원.
+> 리깅 전 시연: Live2D [무료 샘플 모델](https://www.live2d.com/en/learn/sample/)을 넣어 미리 확인.
+> 자세한 안내: `public/avatar2d_live2d/HOWTO.txt`
 
-Vercel env `VITE_AVATAR_KIND = vrm` 추가 후 Redeploy → [VRoid](https://vroid.com/en/studio)
-VRM 파일을 `public/avatar.vrm` 으로 넣으면 됩니다. (원본 cha-bot-starterkit 과 동일)
+#### 🖼️ (간단) PNG 2D — 리깅 없이 그림 몇 장
+
+`VITE_AVATAR_KIND = 2d` 후, `public/avatar2d/` 에 `idle.png`(필수)·`talk.png`·`wink.png`.
+말할 때 음량에 맞춰 입 모양(idle↔talk)이 바뀝니다. 자세한 안내: `public/avatar2d/HOWTO.txt`
+
+#### 🧍 (대안) VRoid 3D
+
+`VITE_AVATAR_KIND = vrm` 후, [VRoid](https://vroid.com/en/studio) VRM 을 `public/avatar.vrm` 으로.
 
 ---
 
