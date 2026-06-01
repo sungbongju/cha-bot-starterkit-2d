@@ -1,5 +1,7 @@
 /* Image2DAvatar — 2D 이미지 아바타 무대.
-   idle/talk/wink 세 레이어를 같은 자리에 겹쳐 두고 opacity 로 크로스페이드한다.
+   idle/talk/wink 세 레이어를 같은 자리에 겹쳐 둔다.
+   말하는 동안 talk 만 opacity 1 로 덮어 "한 얼굴"만 보이게 → 분신(이중노출) 방지.
+   음량은 squashWrap 의 미세 수직 스쿼시에만 사용.
    투명 배경이라 패널 배경/글로우가 그대로 비친다. */
 
 .stage {
@@ -11,10 +13,10 @@
   justify-content: center;
   overflow: hidden;
   cursor: pointer;
-  --a2d-talk: 0;            /* speak() 가 음량(0..1)으로 갱신 → 베이스 squash */
+  --a2d-talk: 0;            /* speak() 가 음량(0..1)으로 갱신 → 스쿼시 */
 }
 
-/* idle 상하 호흡/부유 — 말할 때도 유지(레이어 전체가 같이 움직여 정렬 유지) */
+/* idle 상하 호흡/부유 — 말할 때도 유지 */
 .floatWrap {
   position: relative;
   width: 100%;
@@ -26,6 +28,16 @@
   0%,
   100% { transform: translateY(0) rotate(0deg); }
   50%  { transform: translateY(-2.2%) rotate(-0.4deg); }
+}
+
+/* 음량 기반 미세 수직 스쿼시 — 모든 레이어에 같이 적용돼 정렬 유지 + 말하는 생동감 */
+.squashWrap {
+  position: absolute;
+  inset: 0;
+  transform-origin: 50% 100%;
+  transform: scaleY(calc(1 + var(--a2d-talk) * 0.05))
+             scaleX(calc(1 - var(--a2d-talk) * 0.022));
+  will-change: transform;
 }
 
 /* 세 레이어를 같은 박스에 겹침. object-fit:contain 으로 캐릭터가 같은 자리에 정렬된다. */
@@ -43,24 +55,20 @@
   object-fit: contain;
   user-select: none;
   -webkit-user-drag: none;
-  transform-origin: 50% 100%;
   filter: drop-shadow(0 12px 18px rgba(0, 0, 0, 0.18));
 }
 
-/* 베이스(idle): 음량 기반 미세 수직 squash(폴백/생동감) */
-.base .avatarImg {
-  transform: scaleY(calc(1 + var(--a2d-talk) * 0.045))
-             scaleX(calc(1 - var(--a2d-talk) * 0.02));
-  will-change: transform;
-}
-
-/* talk 오버레이: opacity 는 JS(rAF)가 직접 제어 → 부드러운 크로스페이드 */
+/* talk 오버레이: 평소 0, 말하는 동안 1(완전 불투명). 발화당 한 번만 부드럽게 전환. */
 .talk {
   opacity: 0;
-  will-change: opacity;
+  transition: opacity 160ms ease;
+  z-index: 1;
+}
+.talkOn {
+  opacity: 1;
 }
 
-/* wink 오버레이: 클릭 시 짧게 페이드 */
+/* wink 오버레이: 클릭 시 짧게 페이드 (talk 위) */
 .wink {
   opacity: 0;
   transition: opacity 140ms ease;
@@ -72,5 +80,5 @@
 
 @media (prefers-reduced-motion: reduce) {
   .floatWrap { animation: none; }
-  .base .avatarImg { transform: none; }
+  .squashWrap { transform: none; }
 }

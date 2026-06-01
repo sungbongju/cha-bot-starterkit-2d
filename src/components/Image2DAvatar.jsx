@@ -3,24 +3,24 @@
 // three.js 없이 PNG 이미지 한두 장만으로 "말하는 캐릭터"를 구현한다.
 // VRMAvatar.jsx 와 동일한 imperative handle 을 노출하므로 App.jsx 입장에선 드롭인 교체다.
 //
-// 부드러운 립싱크(깜빡임 방지):
-//  - idle / talk 두 이미지를 "겹쳐" 두고, talk 레이어의 opacity 를 음량 envelope 로
-//    연속 조절(크로스페이드)한다. 프레임을 휙휙 교체하지 않으므로 깜빡이지 않는다.
-//  - 말하는 동안 talk 는 항상 절반 이상(0.5~1.0) 떠 있고 음량에 맞춰 은은히 펄스 → "말하며 웃는" 느낌.
-//  - 발화가 끝나면 talk 를 부드럽게 페이드아웃.
-//  - talk 가 없으면 idle 한 장에 수직 squash 만 줘서 말하는 느낌(폴백).
-//  - idle: 상하 float 애니메이션(CSS). 클릭하면 wink 가 잠깐 페이드.
+// 분신(이중 노출)·깜빡임을 피하는 설계:
+//  - idle(기본) / talk(말할 때) / wink 세 이미지를 같은 자리에 겹쳐 둔다.
+//  - "말하는 중" 동안 talk 를 opacity 1(완전 불투명)로 덮어 **한 얼굴만** 보이게 한다.
+//    (idle 과 talk 는 몸·포즈가 동일하고 얼굴만 다르므로, 덮으면 얼굴만 깔끔히 바뀐다.)
+//    → 반투명으로 두 얼굴을 동시에 비추지 않으므로 분신이 안 생긴다.
+//  - 발화 시작/종료 시 talk opacity 를 0↔1 로 한 번만 부드럽게 전환(CSS transition).
+//  - 음량(RMS)은 얼굴 교체가 아니라 **미세한 수직 squash** 에만 사용 → 깜빡임 없이 말하는 생동감.
+//  - idle: 상하 float 애니메이션. 클릭하면 wink 가 잠깐 페이드.
 //
 // 준비물: public/avatar2d/ 에 idle.png(필수) · talk.png(선택) · wink.png(선택).
+//   talk 가 없으면 idle 한 장에 squash 만 줘서 말하는 느낌(폴백).
 
 import { useEffect, useRef, useState, forwardRef, useImperativeHandle } from 'react'
 import styles from './Image2DAvatar.module.css'
 
 const LIPSYNC_FLOOR = 0.018   // 이 이하 RMS 는 무음
 const LIPSYNC_GAIN  = 6.5     // RMS → 0..1
-const ENV_SMOOTH    = 0.18    // talk opacity 보간(작을수록 부드럽고 느림)
-const TALK_FLOOR    = 0.5     // 말하는 동안 talk 최소 노출(이 아래로 안 내려가 깜빡임 방지)
-const FADE_OUT_MS   = 260     // 발화 종료 시 페이드아웃
+const SQUASH_SMOOTH = 0.35    // squash 보간(부드럽게)
 
 function preload(src) {
   return new Promise((resolve) => {
@@ -45,15 +45,13 @@ const Image2DAvatar = forwardRef(function Image2DAvatar(
   },
   ref
 ) {
-  const [srcs, setSrcs] = useState(null)     // {idle, talk, wink}
+  const [srcs, setSrcs] = useState(null)       // {idle, talk, wink}
+  const [speaking, setSpeaking] = useState(false)
   const [winkOn, setWinkOn] = useState(false)
 
   const srcsRef = useRef(null)
   const readyRef = useRef(false)
-
   const mountRef = useRef(null)
-  const baseLayerRef = useRef(null)
-  const talkLayerRef = useRef(null)
 
   // ── 오디오 / 립싱크 ──
   const audioCtxRef = useRef(null)
@@ -63,8 +61,7 @@ const Image2DAvatar = forwardRef(function Image2DAvatar(
   const speakingRef = useRef(false)
   const speakEndResolveRef = useRef(null)
   const rafRef = useRef(0)
-  const mouthOpenRef = useRef(0)
-  const envRef = useRef(0)            // talk opacity envelope (부드럽게 따라감)
+  const squashRef = useRef(0)
 
   // ── 이미지 사전 로드 ──
   useEffect(() => {
@@ -80,7 +77,7 @@ const Image2DAvatar = forwardRef(function Image2DAvatar(
         onError?.(new Error('2D 아바타 이미지를 찾지 못했습니다. public/avatar2d/idle.png 를 추가하세요.'))
         return
       }
-      const next = { idle: resolvedIdle, talk: talk || resolvedIdle, wink: wink || null }
+      const next = { idle: resolvedIdle, talk: talk || null, wink: wink || null }
       srcsRef.current = next
       setSrcs(next)
       readyRef.current = true
@@ -97,25 +94,17 @@ const Image2DAvatar = forwardRef(function Image2DAvatar(
     return audioCtxRef.current
   }
 
-  // talk 레이어 opacity / 베이스 squash 를 DOM 으로 직접 갱신(리렌더 0 → 부드러움).
-  const setTalkOpacity = (v) => {
-    const el = talkLayerRef.current
-    if (el) el.style.opacity = String(Math.max(0, Math.min(1, v)))
-  }
+  // 음량 기반 미세 squash 만 DOM 으로 직접 갱신(리렌더 0). opacity 는 건드리지 않는다.
   const setSquash = (v) => {
+    squashRef.current = v
     if (mountRef.current) mountRef.current.style.setProperty('--a2d-talk', String(Math.max(0, Math.min(1, v))))
   }
 
-  const fadeOutTalk = () => {
-    const el = talkLayerRef.current
-    if (el) {
-      el.style.transition = `opacity ${FADE_OUT_MS}ms ease`
-      el.style.opacity = '0'
-      setTimeout(() => { if (el) el.style.transition = 'none' }, FADE_OUT_MS + 20)
-    }
+  const stopVisuals = () => {
+    if (rafRef.current) { cancelAnimationFrame(rafRef.current); rafRef.current = 0 }
     setSquash(0)
-    envRef.current = 0
-    mouthOpenRef.current = 0
+    setSpeaking(false)
+    speakingRef.current = false
   }
 
   const stopCurrentAudio = () => {
@@ -125,15 +114,13 @@ const Image2DAvatar = forwardRef(function Image2DAvatar(
       currentSourceRef.current = null
     }
     analyserRef.current = null
-    speakingRef.current = false
-    if (rafRef.current) { cancelAnimationFrame(rafRef.current); rafRef.current = 0 }
-    fadeOutTalk()
+    stopVisuals()
     const resolve = speakEndResolveRef.current
     speakEndResolveRef.current = null
     if (resolve) resolve()
   }
 
-  // rAF 루프: 발화 중 음량 분석 → talk opacity(크로스페이드) + 미세 squash.
+  // rAF 루프: 발화 중 음량 분석 → 미세 squash 만 갱신(얼굴 교체 X → 깜빡임/분신 없음).
   const analyseLoop = () => {
     const tick = () => {
       if (!speakingRef.current) return
@@ -148,12 +135,8 @@ const Image2DAvatar = forwardRef(function Image2DAvatar(
         }
         const rms = Math.sqrt(sum / data.length)
         const open = Math.max(0, Math.min(1, (rms - LIPSYNC_FLOOR) * LIPSYNC_GAIN))
-        mouthOpenRef.current = open
-        // 말하는 동안 talk 는 0.5~1.0 사이에서만 움직임 → 깜빡임 없이 은은한 펄스
-        const target = TALK_FLOOR + (1 - TALK_FLOOR) * open
-        envRef.current += (target - envRef.current) * ENV_SMOOTH
-        setTalkOpacity(envRef.current)
-        setSquash(open * 0.6)   // 베이스 미세 squash(폴백/생동감)
+        const next = squashRef.current + (open - squashRef.current) * SQUASH_SMOOTH
+        setSquash(next)
       }
       rafRef.current = requestAnimationFrame(tick)
     }
@@ -198,9 +181,7 @@ const Image2DAvatar = forwardRef(function Image2DAvatar(
       analyserDataRef.current = new Uint8Array(analyser.fftSize)
       currentSourceRef.current = source
       speakingRef.current = true
-      // 페이드 트랜지션 끄고(루프가 직접 제어), envelope 초기화
-      if (talkLayerRef.current) talkLayerRef.current.style.transition = 'none'
-      envRef.current = 0
+      setSpeaking(true)            // talk 레이어 opacity 1 (CSS transition)
       analyseLoop()
 
       return new Promise((resolve) => {
@@ -209,9 +190,7 @@ const Image2DAvatar = forwardRef(function Image2DAvatar(
           if (currentSourceRef.current !== source) return
           currentSourceRef.current = null
           analyserRef.current = null
-          speakingRef.current = false
-          if (rafRef.current) { cancelAnimationFrame(rafRef.current); rafRef.current = 0 }
-          fadeOutTalk()
+          stopVisuals()
           speakEndResolveRef.current = null
           resolve()
         }
@@ -221,14 +200,10 @@ const Image2DAvatar = forwardRef(function Image2DAvatar(
 
     stopSpeaking: () => stopCurrentAudio(),
 
-    setMouthOpen: (v) => { mouthOpenRef.current = Math.max(0, Math.min(1, Number(v) || 0)) },
+    setMouthOpen: (v) => { setSquash(Math.max(0, Math.min(1, Number(v) || 0))) },
 
-    // 감정 표정 — 간단 매핑(봇이 호출할 때만). happy→talk 노출, surprised→wink, 그 외→해제.
-    setExpression: (name) => {
-      if (name === 'happy') { setTalkOpacity(1) }
-      else if (name === 'surprised') { doWink() }
-      else if (!speakingRef.current) { setTalkOpacity(0) }
-    },
+    // 감정 표정 — 간단 매핑(봇이 호출할 때만). surprised → wink.
+    setExpression: (name) => { if (name === 'surprised') doWink() },
 
     wink: () => doWink(),
   }), [])
@@ -255,22 +230,24 @@ const Image2DAvatar = forwardRef(function Image2DAvatar(
     >
       {srcs && (
         <div className={styles.floatWrap}>
-          {/* 베이스(idle) — 항상 표시, 음량에 따라 미세 squash */}
-          <div ref={baseLayerRef} className={`${styles.layer} ${styles.base}`}>
-            <img src={srcs.idle} alt="2D 아바타" className={styles.avatarImg} draggable={false} />
+          <div className={styles.squashWrap}>
+            {/* 베이스(idle) — 항상 표시 */}
+            <div className={styles.layer}>
+              <img src={srcs.idle} alt="2D 아바타" className={styles.avatarImg} draggable={false} />
+            </div>
+            {/* talk 오버레이 — 말하는 동안만 opacity 1(완전 불투명) */}
+            {hasTalk && (
+              <div className={`${styles.layer} ${styles.talk} ${speaking ? styles.talkOn : ''}`}>
+                <img src={srcs.talk} alt="" aria-hidden="true" className={styles.avatarImg} draggable={false} />
+              </div>
+            )}
+            {/* wink 오버레이 — 클릭 시 잠깐 */}
+            {srcs.wink && (
+              <div className={`${styles.layer} ${styles.wink} ${winkOn ? styles.winkOn : ''}`}>
+                <img src={srcs.wink} alt="" aria-hidden="true" className={styles.avatarImg} draggable={false} />
+              </div>
+            )}
           </div>
-          {/* talk 오버레이 — opacity 크로스페이드(JS 제어) */}
-          {hasTalk && (
-            <div ref={talkLayerRef} className={`${styles.layer} ${styles.talk}`}>
-              <img src={srcs.talk} alt="" aria-hidden="true" className={styles.avatarImg} draggable={false} />
-            </div>
-          )}
-          {/* wink 오버레이 — 클릭 시 잠깐 페이드 */}
-          {srcs.wink && (
-            <div className={`${styles.layer} ${styles.wink} ${winkOn ? styles.winkOn : ''}`}>
-              <img src={srcs.wink} alt="" aria-hidden="true" className={styles.avatarImg} draggable={false} />
-            </div>
-          )}
         </div>
       )}
     </div>
