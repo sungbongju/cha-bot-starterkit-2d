@@ -6,11 +6,11 @@ import Live2DAvatar from './Live2DAvatar'
 import RobotFace2DAvatar from './RobotFace2DAvatar'
 
 // 아바타 종류 — Vercel 환경변수 VITE_AVATAR_KIND 로 선택(코드 수정 0곳).
-//   'face' (기본)   : 얼굴 스크린에 입을 코드로 그려 음량 따라 부드럽게 말함 (그릭 등 평면-얼굴 로봇)
-//   '2d'            : PNG 이미지 2프레임 교체 아바타 (idle/talk/wink)
-//   'live2d'        : Live2D — 리깅된 model3.json 필요 (최고 품질 업그레이드)
+//   '2d' (기본)     : PNG 표정 교체 아바타 (idle/talk/wink) — 그린 입 없음
+//   'face'          : 얼굴 스크린에 입을 코드로 그려 음량 따라 말함 (평면-얼굴 로봇)
+//   'live2d'        : Live2D — 리깅된 model3.json 필요 (최고 품질)
 //   'vrm'           : VRoid VRM 3D 아바타 (사람형)
-const AVATAR_KIND = (import.meta.env.VITE_AVATAR_KIND || 'face').toLowerCase()
+const AVATAR_KIND = (import.meta.env.VITE_AVATAR_KIND || '2d').toLowerCase()
 const IS_FACE = AVATAR_KIND === 'face'
 const IS_LIVE2D = AVATAR_KIND === 'live2d'
 const IS_2D = AVATAR_KIND === '2d'
