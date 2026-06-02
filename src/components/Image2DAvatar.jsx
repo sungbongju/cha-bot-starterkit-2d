@@ -20,11 +20,11 @@ import styles from './Image2DAvatar.module.css'
 
 const LIPSYNC_FLOOR = 0.018   // 이 이하 RMS 는 무음
 const LIPSYNC_GAIN  = 6.5     // RMS → 0..1
-const SQUASH_SMOOTH = 0.35    // 음량 보간(부드럽게)
-// 입 열고닫기 토글 — 임계값은 낮게(확실히 열림) + 최소 유지시간으로 깜빡임만 억제
-const MOUTH_ON  = 0.085       // 보간 음량이 이 값을 넘으면 입 벌림(talk)
-const MOUTH_OFF = 0.04        // 이 값 아래로 떨어지면 입 닫음(idle)
-const MOUTH_MIN_HOLD = 110    // ms — 한번 바뀌면 최소 유지(샤샤샥 빠른 깜빡임 방지)
+const SQUASH_SMOOTH = 0.40    // 음량 보간(음절 envelope 따라가게 약간 더 반응적)
+// 입 열고닫기 토글 — 말하면 열리고, 단어/구절 사이 음량이 내려가면 닫히도록
+const MOUTH_ON  = 0.10        // 보간 음량이 이 값을 넘으면 입 벌림(talk)
+const MOUTH_OFF = 0.065       // 이 값 아래(단어 사이 dip)로 떨어지면 입 닫음(idle)
+const MOUTH_MIN_HOLD = 85     // ms — 음절 단위 발화(열림↔닫힘) 허용 + 과한 깜빡임만 억제
 
 function preload(src) {
   return new Promise((resolve) => {
