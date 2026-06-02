@@ -151,7 +151,6 @@ export default function AvatarPanel({
             </div>
           )}
 
-          {status === 'speaking' && <div className={styles.speakGlow} />}
         </div>
 
         {showVoiceOnly && (

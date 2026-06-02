@@ -62,7 +62,7 @@
    짧은 transition 으로 또각또각 깜빡이지 않고 부드럽게 토글. */
 .talk {
   opacity: var(--a2d-mouth, 0);
-  transition: opacity 90ms ease;
+  transition: opacity 120ms ease;
   z-index: 1;
 }
 
