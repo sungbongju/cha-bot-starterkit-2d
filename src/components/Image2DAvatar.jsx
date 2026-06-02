@@ -20,11 +20,11 @@ import styles from './Image2DAvatar.module.css'
 
 const LIPSYNC_FLOOR = 0.018   // 이 이하 RMS 는 무음
 const LIPSYNC_GAIN  = 6.5     // RMS → 0..1
-const SQUASH_SMOOTH = 0.35    // 음량 보간(부드럽게)
-// 입 열고닫기 토글(히스테리시스 + 최소 유지시간) — 떨림/꿀렁임 없이 발화 리듬에 맞춤
-const MOUTH_ON  = 0.14        // 보간 음량이 이 값을 넘으면 입 벌림(talk)
-const MOUTH_OFF = 0.07        // 이 값 아래로 떨어지면 입 닫음(idle)
-const MOUTH_MIN_HOLD = 55     // ms — 한번 바뀌면 최소 유지(채터링 방지)
+const SQUASH_SMOOTH = 0.22    // 음량 보간(낮을수록 더 천천히 반응 → 덜 깜빡임)
+// 입 열고닫기 토글(히스테리시스 + 최소 유지시간) — 발화 리듬에 맞춰 차분하게
+const MOUTH_ON  = 0.16        // 보간 음량이 이 값을 넘으면 입 벌림(talk)
+const MOUTH_OFF = 0.06        // 이 값 아래로 떨어지면 입 닫음(idle) — 간격 넓혀 채터링 억제
+const MOUTH_MIN_HOLD = 130    // ms — 한번 바뀌면 최소 유지(샤샤샥 빠른 깜빡임 방지)
 
 function preload(src) {
   return new Promise((resolve) => {
