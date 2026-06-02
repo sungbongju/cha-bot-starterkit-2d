@@ -50,6 +50,11 @@
   object-fit: contain;
   user-select: none;
   -webkit-user-drag: none;
+}
+
+/* 그림자는 베이스(idle) 한 겹에만 — talk/wink 오버레이가 켜질 때 그림자가
+   겹쳐 진해졌다 옅어지는 "그림자 깜빡임"을 막는다. */
+.layer:not(.talk):not(.wink) .avatarImg {
   filter: drop-shadow(0 12px 18px rgba(0, 0, 0, 0.18));
 }
 
