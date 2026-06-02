@@ -20,7 +20,11 @@ import styles from './Image2DAvatar.module.css'
 
 const LIPSYNC_FLOOR = 0.018   // 이 이하 RMS 는 무음
 const LIPSYNC_GAIN  = 6.5     // RMS → 0..1
-const SQUASH_SMOOTH = 0.35    // squash 보간(부드럽게)
+const SQUASH_SMOOTH = 0.35    // 음량 보간(부드럽게)
+// 입 열고닫기 토글(히스테리시스 + 최소 유지시간) — 떨림/꿀렁임 없이 발화 리듬에 맞춤
+const MOUTH_ON  = 0.14        // 보간 음량이 이 값을 넘으면 입 벌림(talk)
+const MOUTH_OFF = 0.07        // 이 값 아래로 떨어지면 입 닫음(idle)
+const MOUTH_MIN_HOLD = 55     // ms — 한번 바뀌면 최소 유지(채터링 방지)
 
 function preload(src) {
   return new Promise((resolve) => {
@@ -61,7 +65,9 @@ const Image2DAvatar = forwardRef(function Image2DAvatar(
   const speakingRef = useRef(false)
   const speakEndResolveRef = useRef(null)
   const rafRef = useRef(0)
-  const squashRef = useRef(0)
+  const squashRef = useRef(0)       // 음량 보간 누적값(시각 squash 아님)
+  const mouthOpenRef = useRef(0)    // 현재 입 상태 0|1
+  const lastToggleRef = useRef(0)   // 마지막 토글 시각(ms)
 
   // ── 이미지 사전 로드 ──
   useEffect(() => {
@@ -94,15 +100,16 @@ const Image2DAvatar = forwardRef(function Image2DAvatar(
     return audioCtxRef.current
   }
 
-  // 음량 기반 미세 squash 만 DOM 으로 직접 갱신(리렌더 0). opacity 는 건드리지 않는다.
-  const setSquash = (v) => {
-    squashRef.current = v
-    if (mountRef.current) mountRef.current.style.setProperty('--a2d-talk', String(Math.max(0, Math.min(1, v))))
+  // 입 열림(0|1)을 DOM 변수로 직접 갱신(리렌더 0) → talk 레이어 opacity 가 따라감.
+  const setMouth = (v) => {
+    if (mountRef.current) mountRef.current.style.setProperty('--a2d-mouth', v ? '1' : '0')
   }
 
   const stopVisuals = () => {
     if (rafRef.current) { cancelAnimationFrame(rafRef.current); rafRef.current = 0 }
-    setSquash(0)
+    squashRef.current = 0
+    mouthOpenRef.current = 0
+    setMouth(0)
     setSpeaking(false)
     speakingRef.current = false
   }
@@ -135,8 +142,16 @@ const Image2DAvatar = forwardRef(function Image2DAvatar(
         }
         const rms = Math.sqrt(sum / data.length)
         const open = Math.max(0, Math.min(1, (rms - LIPSYNC_FLOOR) * LIPSYNC_GAIN))
-        const next = squashRef.current + (open - squashRef.current) * SQUASH_SMOOTH
-        setSquash(next)
+        // 음량을 부드럽게 보간 → 임계값+히스테리시스+최소유지로 입을 토글(꿀렁임 없음).
+        const smooth = squashRef.current + (open - squashRef.current) * SQUASH_SMOOTH
+        squashRef.current = smooth
+        const now = performance.now()
+        let m = mouthOpenRef.current
+        if (now - lastToggleRef.current >= MOUTH_MIN_HOLD) {
+          if (m === 0 && smooth > MOUTH_ON) { m = 1; lastToggleRef.current = now }
+          else if (m === 1 && smooth < MOUTH_OFF) { m = 0; lastToggleRef.current = now }
+        }
+        if (m !== mouthOpenRef.current) { mouthOpenRef.current = m; setMouth(m) }
       }
       rafRef.current = requestAnimationFrame(tick)
     }
@@ -200,7 +215,7 @@ const Image2DAvatar = forwardRef(function Image2DAvatar(
 
     stopSpeaking: () => stopCurrentAudio(),
 
-    setMouthOpen: (v) => { setSquash(Math.max(0, Math.min(1, Number(v) || 0))) },
+    setMouthOpen: (v) => { const o = (Math.max(0, Math.min(1, Number(v) || 0)) > 0.5) ? 1 : 0; mouthOpenRef.current = o; setMouth(o) },
 
     // 감정 표정 — 간단 매핑(봇이 호출할 때만). surprised → wink.
     setExpression: (name) => { if (name === 'surprised') doWink() },
@@ -237,7 +252,7 @@ const Image2DAvatar = forwardRef(function Image2DAvatar(
             </div>
             {/* talk 오버레이 — 말하는 동안만 opacity 1(완전 불투명) */}
             {hasTalk && (
-              <div className={`${styles.layer} ${styles.talk} ${speaking ? styles.talkOn : ''}`}>
+              <div className={`${styles.layer} ${styles.talk}`}>
                 <img src={srcs.talk} alt="" aria-hidden="true" className={styles.avatarImg} draggable={false} />
               </div>
             )}
