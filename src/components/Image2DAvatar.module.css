@@ -14,6 +14,12 @@
   overflow: hidden;
   cursor: pointer;
   --a2d-mouth: 0;           /* 입 상태 0|1 — speak() 가 음량 토글로 갱신 → talk opacity */
+  /* 배경 그림: public/avatar2d/bg.jpg 가 있으면 깔린다(없으면 무시 → 패널 배경).
+     투명 아바타 뒤가 항상 그림으로 채워져 전환 시 어두운 깜빡임이 사라진다. */
+  background-image: url('/avatar2d/bg.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 /* 부유 애니메이션 제거 — 캐릭터가 가만히 정면을 보도록(둥둥 X) */
