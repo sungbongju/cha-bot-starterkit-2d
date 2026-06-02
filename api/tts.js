@@ -15,11 +15,11 @@ const OMNI_URL =
   process.env.OMNI_URL || 'https://middleton.p-e.kr/omnivoice/v1/audio/speech'
 const OMNI_MODEL = process.env.OMNI_MODEL || 'omnivoice'
 // 기본 음성 — omnivoice instruct 어휘 (emo_manifest 검증값).
-// ※ 4슬롯 고정 형식: "성별, 나이, 음높이, 억양". 추가어(calm/deep/warm 등)는 500 에러.
-//   유효 토큰 예) 나이: young adult / middle-aged / elderly · 음높이: very low pitch / low pitch / moderate pitch
-// 캡틴(40~50대 남성, 더 깊은 중저음 "아저씨" 톤)에 맞춘 기본값. OMNI_INSTRUCT 환경변수로 교체 가능.
+// ※ 4슬롯 고정 형식: "성별, 나이, 음높이, 억양". 추가어/음색(calm/husky/gruff 등)은 500 에러.
+//   유효 토큰(전부): 나이 = young adult | middle-aged | elderly · 음높이 = very low pitch | low pitch | moderate pitch
+// 캡틴(풍파 겪은 노련한 선장 — 더 깊고 중후한 톤)에 맞춘 기본값. OMNI_INSTRUCT 환경변수로 교체 가능.
 const OMNI_INSTRUCT =
-  process.env.OMNI_INSTRUCT || 'male, middle-aged, very low pitch, korean accent'
+  process.env.OMNI_INSTRUCT || 'male, elderly, very low pitch, korean accent'
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*')
