@@ -21,7 +21,7 @@ const OMNI_MODEL = process.env.OMNI_MODEL || 'omnivoice'
 //   · 억양 = korean | american | british | japanese | chinese (accent)
 // 캡틴(연륜 있는 노선장 — 깊고 중후한 노년 남성 톤)에 맞춘 기본값. OMNI_INSTRUCT 환경변수로 교체 가능.
 const OMNI_INSTRUCT =
-  process.env.OMNI_INSTRUCT || 'male, elderly, very low pitch, korean accent'
+  process.env.OMNI_INSTRUCT || 'male, elderly, low pitch, korean accent'
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*')
