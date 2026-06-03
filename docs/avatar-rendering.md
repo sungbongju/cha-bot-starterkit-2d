@@ -14,7 +14,7 @@ App.jsx                         ← 대화 로직 + TTS 큐
   │  vrmAvatarRef.speak(buf)    ← /api/tts 가 만든 음성(ArrayBuffer)
   ▼
 AvatarPanel.jsx                 ← VITE_AVATAR_KIND 으로 렌더러 1개만 마운트
-  ├ '2d'     → Image2DAvatar.jsx      (DOM <img> 레이어)   ★ 기본/그릭봇
+  ├ '2d'     → Image2DAvatar.jsx      (DOM <img> 레이어)   ★ 기본
   ├ 'face'   → RobotFace2DAvatar.jsx  (<canvas> 입 직접 그림)
   ├ 'live2d' → Live2DAvatar.jsx       (PIXI.js + Cubism)
   └ 'vrm'    → VRMAvatar.jsx          (three.js + three-vrm)
@@ -95,19 +95,19 @@ ArrayBuffer (mp3/wav)
 
 ## 5. 렌더러 4종 상세
 
-### 5-1. Image2DAvatar (기본, 그릭봇)
+### 5-1. Image2DAvatar (기본)
 - **방식**: 순수 DOM. `idle.png` / `talk.png` / `wink.png` 세 `<img>` 를 같은 자리에 겹쳐 둠.
 - **말하기**: 말하는 동안 `talk` 레이어를 **opacity 1 로 완전히 덮어** 한 얼굴만 보이게 함
   (idle/talk 가 몸·포즈 동일하고 얼굴만 달라서 덮으면 표정만 깔끔히 바뀜 → **분신/깜빡임 없음**).
   음량은 얼굴 교체가 아니라 `--a2d-talk` 스쿼시에만 사용.
 - **idle**: CSS `float` 애니메이션. **클릭**: `wink` 레이어 잠깐 페이드.
-- **에셋**: `public/avatar2d/` 에 `idle.png`(필수)/`talk.png`/`wink.png`. (그릭: idle=Curious, talk=Happy, wink=Wink. 10종 전체는 `expressions/`).
+- **에셋**: `public/avatar2d/` 에 `idle.png`(필수)/`talk.png`/`wink.png`.
 
 ### 5-2. RobotFace2DAvatar ('face')
 - **방식**: `<canvas>` 에 베이스 얼굴 이미지 + **코드로 그린 빛나는 입**.
 - **말하기**: 입의 높이를 음량으로 연속 조절 → 진짜 입이 열렸다 닫힘.
 - **입 위치**: 베이스 이미지 기준 **비율 좌표**(`DEF.cx/cy/...`)로 지정 → 어떤 크기로 렌더돼도 정확.
-  기본값은 그릭 얼굴(평면 스크린)에 맞춰 측정됨.
+  기본값은 평면 스크린 얼굴에 맞춰 측정됨.
 
 ### 5-3. Live2DAvatar ('live2d')
 - **스택(★버전 고정 필수)**: `pixi.js@^7` + `pixi-live2d-display-lipsyncpatch@0.5.0-ls-8`
