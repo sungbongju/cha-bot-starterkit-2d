@@ -9,30 +9,35 @@
   width: 100%;
   height: 100%;
   display: flex;
-  align-items: center;     /* 하단 고정 X → 수직 중앙(위로 올림) */
+  align-items: flex-end;
   justify-content: center;
   overflow: hidden;
   cursor: pointer;
-  --a2d-mouth: 0;           /* 입 상태 0|1 — speak() 가 음량 토글로 갱신 → talk opacity */
-  /* 배경 그림: public/avatar2d/bg.jpg 가 있으면 깔린다(없으면 무시 → 패널 배경).
-     투명 아바타 뒤가 항상 그림으로 채워져 전환 시 어두운 깜빡임이 사라진다. */
-  background-image: url('/avatar2d/bg.jpg');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+  --a2d-talk: 0;            /* speak() 가 음량(0..1)으로 갱신 → 스쿼시 */
 }
 
-/* 부유 애니메이션 제거 — 캐릭터가 가만히 정면을 보도록(둥둥 X) */
+/* idle 상하 호흡/부유 — 말할 때도 유지 */
 .floatWrap {
   position: relative;
   width: 100%;
   height: 100%;
+  animation: a2dFloat 3.6s ease-in-out infinite;
 }
 
-/* 스쿼시(꿀렁임) 제거 — 정렬만 유지하는 정적 박스 */
+@keyframes a2dFloat {
+  0%,
+  100% { transform: translateY(0) rotate(0deg); }
+  50%  { transform: translateY(-2.2%) rotate(-0.4deg); }
+}
+
+/* 음량 기반 미세 수직 스쿼시 — 모든 레이어에 같이 적용돼 정렬 유지 + 말하는 생동감 */
 .squashWrap {
   position: absolute;
   inset: 0;
+  transform-origin: 50% 100%;
+  transform: scaleY(calc(1 + var(--a2d-talk) * 0.05))
+             scaleX(calc(1 - var(--a2d-talk) * 0.022));
+  will-change: transform;
 }
 
 /* 세 레이어를 같은 박스에 겹침. object-fit:contain 으로 캐릭터가 같은 자리에 정렬된다. */
@@ -40,30 +45,27 @@
   position: absolute;
   inset: 0;
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: center;
 }
 
 .avatarImg {
-  max-width: 100%;
-  max-height: 100%;
+  max-width: 92%;
+  max-height: 98%;
   object-fit: contain;
   user-select: none;
   -webkit-user-drag: none;
-}
-
-/* 그림자는 베이스(idle) 한 겹에만 — talk/wink 오버레이가 켜질 때 그림자가
-   겹쳐 진해졌다 옅어지는 "그림자 깜빡임"을 막는다. */
-.layer:not(.talk):not(.wink) .avatarImg {
   filter: drop-shadow(0 12px 18px rgba(0, 0, 0, 0.18));
 }
 
-/* talk 오버레이: 입 상태 변수(0|1)를 따라가며 발화 음량에 맞춰 입을 열고닫는다.
-   짧은 transition 으로 또각또각 깜빡이지 않고 부드럽게 토글. */
+/* talk 오버레이: 평소 0, 말하는 동안 1(완전 불투명). 발화당 한 번만 부드럽게 전환. */
 .talk {
-  opacity: var(--a2d-mouth, 0);
-  transition: opacity 120ms ease;
+  opacity: 0;
+  transition: opacity 160ms ease;
   z-index: 1;
+}
+.talkOn {
+  opacity: 1;
 }
 
 /* wink 오버레이: 클릭 시 짧게 페이드 (talk 위) */

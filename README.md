@@ -133,7 +133,7 @@ https://middleton.p-e.kr/finbot/team/[본인팀번호]/rag
 | Live2D | `live2d` | 부드럽게 말하고 눈 깜빡임 (VTuber 방식, 최고 품질) | Cubism 으로 리깅한 `model3.json` 세트 |
 | VRoid 3D | `vrm` | 사람형 3D | `avatar.vrm` |
 
-> **얼굴-스크린(face)** 은 "검은 화면 얼굴" 로봇용. `public/avatar2d/idle.png` 한 장만 있으면
+> **얼굴-스크린(face)** 은 그릭 같은 "검은 화면 얼굴" 로봇용. `public/avatar2d/idle.png` 한 장만 있으면
 > 입을 코드로 그려 음량에 따라 진짜 벌렸다 닫혀요(사진 교체가 아니라 분신·깜빡임 없음).
 > 입 위치는 `RobotFace2DAvatar.jsx` 의 `DEF`(cx/cy/halfW…)로 캐릭터에 맞게 조정.
 

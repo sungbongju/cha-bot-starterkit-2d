@@ -7,7 +7,7 @@
 //   speak / stopSpeaking / isReady / isSpeaking / setMouthOpen / setExpression / wink
 //
 // 입 위치는 베이스 이미지(idle.png) 기준 "비율 좌표"로 지정 → 어떤 크기로 렌더돼도 정확.
-// 기본값은 평면 스크린 얼굴 기준 측정값. 다른 캐릭터면 mouth* 값만 바꾸면 됨.
+// 기본값은 그릭(Hermes) 봇 얼굴에 맞춰 측정됨. 다른 캐릭터면 mouth* 값만 바꾸면 됨.
 
 import { useEffect, useRef, forwardRef, useImperativeHandle } from 'react'
 import styles from './RobotFace2DAvatar.module.css'
@@ -16,7 +16,7 @@ const LIPSYNC_FLOOR = 0.018
 const LIPSYNC_GAIN  = 6.5
 const MOUTH_SMOOTH  = 0.35
 
-// 입 위치/크기 — 베이스 이미지 폭/높이에 대한 비율 (기준 측정값)
+// 입 위치/크기 — 베이스 이미지 폭/높이에 대한 비율 (그릭 얼굴 기준 측정값)
 const DEF = {
   cx: 0.548,       // 입 중심 X
   cy: 0.372,       // 입 중심 Y (눈 아래, 스크린 하단 1/3)
